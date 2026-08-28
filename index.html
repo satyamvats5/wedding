@@ -2,6 +2,12 @@
 <meta charset="utf-8">
 <title>Moonlit Vows</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+
+<!-- Tints the browser's own toolbars to match the page. Starts dark
+     for the cover; JS swaps it to the warm ground when the doors
+     open. Can't remove the chrome (nothing can, least of all inside
+     WhatsApp's in-app browser) but it stops looking like chrome. -->
+<meta name="theme-color" content="#070b1c">
 <meta name="robots" content="noindex, nofollow">
 <meta name="googlebot" content="noindex, nofollow">
 
@@ -78,7 +84,9 @@ body{
   -webkit-font-smoothing:antialiased;
   text-rendering:optimizeLegibility;
 }
-body.is-locked{ overflow:hidden; height:100vh; }
+/* dvh, not vh: on mobile 100vh is the *tall* viewport and ignores the
+   visible URL bar, which made the cover overflow the screen. */
+body.is-locked{ overflow:hidden; height:100vh; height:100dvh; }
 
 img,svg,canvas{ display:block; max-width:100%; }
 button{ font:inherit; color:inherit; }
@@ -806,11 +814,15 @@ html[lang="bn"] .invocation{ font-family:var(--f-bangla); }
       <p class="eyebrow" data-i18n="gettingMarried">We're getting married</p>
       <svg class="hero-heart" data-ico="heartSolid" aria-hidden="true"></svg>
 
+      <!-- Left empty on purpose: renderStatic() fills these from
+           CONFIG.couple, so CONFIG stays the only place a name is
+           written. Hardcoding fallback text here means editing the
+           names in two places and missing one. -->
       <div class="names">
-        <h1 class="name" id="nameA">Aarav</h1>
+        <h1 class="name" id="nameA"></h1>
         <p class="parent" id="parentA"></p>
         <div class="amp">&amp;</div>
-        <h1 class="name" id="nameB">Meera</h1>
+        <h1 class="name" id="nameB"></h1>
         <p class="parent" id="parentB"></p>
       </div>
 
@@ -1054,8 +1066,9 @@ const CONFIG = {
   venues: [
     { label: { en: "Wedding Venue", hi: "विवाह स्थल", bn: "বিবাহস্থল" },
       name:  "The Leela Palace",
-      city:  { en: "Old Airport Road, Bengaluru", hi: "ओल्ड एयरपोर्ट रोड, बेंगलुरु",
-               bn: "ওল্ড এয়ারপোর্ট রোড, বেঙ্গালুরু" },
+      /* City only — the street belongs in `addr` below. This also
+         feeds the hero's sub-line, where an address reads oddly. */
+      city:  { en: "Bengaluru", hi: "बेंगलुरु", bn: "বেঙ্গালুরু" },
       addr:  { en: "23 Kodihalli, HAL Old Airport Rd, Bengaluru 560008",
                hi: "23 कोडिहल्ली, एचएएल ओल्ड एयरपोर्ट रोड, बेंगलुरु 560008",
                bn: "23 কোদিহল্লি, এইচএএল ওল্ড এয়ারপোর্ট রোড, বেঙ্গালুরু 560008" },
@@ -1065,8 +1078,9 @@ const CONFIG = {
       embed: "" },
     { label: { en: "Reception Venue", hi: "स्वागत समारोह स्थल", bn: "সংবর্ধনার স্থান" },
       name:  "The Terrace, Leela Palace",
-      city:  { en: "Old Airport Road, Bengaluru", hi: "ओल्ड एयरपोर्ट रोड, बेंगलुरु",
-               bn: "ওল্ড এয়ারপোর্ট রোড, বেঙ্গালুরু" },
+      /* City only — the street belongs in `addr` below. This also
+         feeds the hero's sub-line, where an address reads oddly. */
+      city:  { en: "Bengaluru", hi: "बेंगलुरु", bn: "বেঙ্গালুরু" },
       addr:  { en: "Rooftop, Tower Wing · Entry from Gate 2",
                hi: "छत, टॉवर विंग · गेट 2 से प्रवेश",
                bn: "ছাদ, টাওয়ার উইং · গেট 2 দিয়ে প্রবেশ" },
@@ -2536,10 +2550,29 @@ function boot(){
      earlier is what made the doors stop mid-swing.            */
   const OPEN_MS = reduceMotion ? 750 : 3900;
 
+  /* The browser UI can't be removed, so tint it to match instead:
+     dark behind the cover, the page's warm ground afterwards.     */
+  const setThemeColor = c => {
+    const m = document.querySelector('meta[name="theme-color"]');
+    if (m) m.setAttribute('content', c);
+  };
+
   let opened = false;
   const open = async () => {
     if (opened) return;
     opened = true;
+
+    /* Real fullscreen where it's permitted. This has to fire inside
+       the tap's gesture window — hence before any await below — and
+       it is best-effort by design: iPhone Safari has no element
+       fullscreen at all, and an in-app webview may refuse. Both
+       cases no-op silently rather than breaking the open.        */
+    try {
+      const el = document.documentElement;
+      if (el.requestFullscreen) el.requestFullscreen({ navigationUI: 'hide' })?.catch(() => {});
+      else el.webkitRequestFullscreen?.();   /* older iPad Safari */
+    } catch {}
+
     cover.classList.add('is-open');
     try { await Music.play(); musicBtn.classList.remove('is-muted'); }
     catch { musicBtn.classList.add('is-muted'); }
@@ -2553,6 +2586,8 @@ function boot(){
       document.body.classList.remove('is-locked');
       observeReveals();
       cover.remove();
+      /* the cover is gone, so match the page's own ground colour */
+      setThemeColor('#efd9d7');
     }, OPEN_MS);
   };
   $('#openBtn').addEventListener('click', open);

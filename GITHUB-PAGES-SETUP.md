@@ -42,12 +42,30 @@ disturbing anything set up in Part 1.
 - [x] **Invocation stays in Devanagari in all languages** — deliberate. `invocation.en`
       is intentionally identical to `invocation.hi`.
 
-Still open:
+- [x] **`<!DOCTYPE html>` and `<meta charset="utf-8">` added** — the file had neither, so
+      browsers rendered it in quirks mode and guessed the encoding. Worth eyeballing the
+      Devanagari and Bangla text on a device that isn't yours.
+- [x] **Discreet link preview** — `og:title` / `og:description` carry an emoji and no
+      details. No `og:image` (would need a public, permanently-cached asset) and no
+      `og:url` (so it survives a later move to a custom domain).
+- [x] **Browser chrome tinted to match** — `theme-color` is dark for the cover, then the
+      page's warm ground once the doors open. `requestFullscreen()` fires on the cover tap
+      where allowed (Android/desktop; iPhone Safari has no element fullscreen, so it
+      no-ops). `body.is-locked` uses `100dvh`, so the cover no longer overflows behind a
+      mobile URL bar. True chrome-free viewing is not achievable — see "Fullscreen" below.
+- [x] **Hero shows month + city only** — the exact day, weekday and time now arrive under
+      the scratch card, so the reveal reveals something. The timeline still states the full
+      date in plain text.
+- [x] **`venues[].city` holds a city, not a street** — the street lives in `addr`, which
+      also removed a duplication on the venue cards.
+- [x] **CONFIG is the single source of truth for content** — the couple's names used to be
+      hardcoded in the hero markup *as well as* in CONFIG. The markup is now empty and
+      `renderStatic()` fills it, so a name is written in exactly one place.
 
-- [ ] **Add `<!DOCTYPE html>` and `<meta charset="utf-8">`.** The file has neither, so
-      browsers render it in *quirks mode* and guess the text encoding. This is the one
-      real outstanding risk — see "Notes on this specific page" below. Test the Devanagari
-      and Bangla text on a device that isn't yours before ruling it out.
+Still open — content only:
+
+- [ ] **Replace the template's placeholder details.** See the checklist below. This is the
+      last thing standing between the site and being shareable; everything above is done.
 
 Not defects, don't "fix" these:
 
@@ -58,6 +76,48 @@ Not defects, don't "fix" these:
   Switching to **Bangla does** change the verse. The switcher is working.
 
 Part 2 (custom domain) is deferred and entirely optional.
+
+---
+
+## Content checklist — everything you need to edit
+
+**All guest-facing content lives in one object: `const CONFIG`, roughly lines 992–1208 of
+`wedding-invitation.html`.** Nothing needs to be changed outside it. The sections are
+numbered in the source, so you can work straight down the list:
+
+| § | Field | Currently holds |
+|---|---|---|
+| 0 | `invocation`, `heroInvocation` | Ganesha shloka — **keep as-is** (Devanagari in all languages, deliberate) |
+| 1 | `couple.a.name` / `.parents` | **Aarav**, Shri Rajesh Sharma & Smt. Anita Sharma |
+| 1 | `couple.b.name` / `.parents` | **Meera**, Shri Viren Iyer & Smt. Shaila Iyer |
+| 1 | `couple.hashtag` | `#AaravWedsMeera` |
+| 2 | `weddingAt` | `2026-12-13T08:00:00+05:30` — drives countdown, scratch card, calendar link |
+| 3 | `timeline[]` | 5 sample events (Mehendi, Haldi, …) with dates and rooms |
+| 4 | `venues[]` | 2 × The Leela Palace — `name`, `city`, `addr`, `maps`, `embed` |
+| 5 | `preEvents[]` | Welcome Dinner, Ganesh Puja, … |
+| 6 | `transport`, `gifts`, `rsvpBy` | sample text |
+| 7 | `rsvp` | **already real** — Google Form ID, WhatsApp, email. Don't touch. |
+| 8 | `assets.photo` | `demo_Img.jpg` placeholder — see note below |
+| 8 | `assets.cover/hero/ganesha/song` | empty; art is drawn in canvas until you add files |
+
+Three things to know while editing:
+
+- **Every text field takes either a plain string or a `{ en, hi, bn }` object.** A plain
+  string shows identically in all three languages — fine for names and places. Anything
+  prose-like wants all three, or Hindi and Bangla guests see English.
+- **`weddingAt` must stay ISO 8601 with the offset** (`+05:30`). It feeds the countdown and
+  the "add to calendar" link, so a malformed value breaks both silently.
+- **The photo wants ~1400×1050 (4:3 landscape).** The current placeholder is 236×353
+  portrait, so the frame's `object-fit: cover` crops half its height and upscales it into a
+  480px column. A 4:3 image drops in with no crop and no softness.
+
+After editing, publish with the usual three steps:
+
+```bash
+cp wedding-invitation.html index.html
+git add index.html && git commit -m "Real wedding details"
+git push
+```
 
 ---
 
@@ -230,32 +290,51 @@ can point it at their own Pages site.
 
 No local images, CSS, or JS to move, so `index.html` is the entire site.
 
-### Missing doctype and charset
+### Fullscreen: why the browser bar can't be removed
 
-The file begins directly with `<title>` — there's no `<!DOCTYPE html>`, no `<html>`/`<head>`
-wrapper, and no `<meta charset>`. It was written as an artifact *body*, which normally gets
-wrapped automatically at publish time; served as a standalone file, nothing wraps it.
+The page asks for fullscreen on the cover tap, but "only the content, nothing else" is not
+reachable, for three independent reasons:
 
-Browsers cope, but with two consequences:
+- **Fullscreen requires a user gesture.** It can't be requested on page load, only from a
+  tap. That's why the call sits on the cover tap, before any `await`, so it stays inside
+  the gesture window.
+- **iPhone Safari has no element fullscreen at all** — the API is video-only there. The
+  call no-ops.
+- **Most guests won't be in a browser.** Tapping a link inside WhatsApp opens WhatsApp's
+  own webview, whose header no web API can touch. This is the real ceiling.
 
-- **Quirks mode.** Without a doctype, browsers emulate legacy layout rules — `box-sizing`,
-  percentage heights, and `line-height` can all compute differently than intended.
-- **Guessed encoding.** Without a charset declaration the browser infers one. The page uses
-  Devanagari and Bangla text, so a wrong guess shows mojibake.
+So the approach is to make the chrome *blend* rather than vanish: `theme-color` tints the
+browser's toolbars to match the page (dark on the cover, warm afterwards). The only route
+to genuine fullscreen is a PWA manifest plus "Add to Home Screen", which requires each
+guest to install the invitation — not worth building.
 
-The fix is two lines at the very top:
+### Doctype and charset — fixed, but worth understanding
+
+The file used to begin directly with `<title>`: no `<!DOCTYPE html>`, no `<html>`/`<head>`
+wrapper, no `<meta charset>`. It was written as an artifact *body*, which normally gets
+wrapped automatically at publish time — but nothing wraps a standalone file on Pages.
+
+Both lines are now in place at the top:
 
 ```html
 <!DOCTYPE html>
 <meta charset="utf-8">
 ```
 
-Worth doing, but test afterward: switching from quirks to standards mode can shift the
-layout, which is exactly why it hasn't been applied automatically.
+What they fixed:
 
-One thing to test on the live URL: the RSVP form submits to Google Forms, which is blocked
-in some preview environments but should work from real hosting. Send a test RSVP once the
-site is up and confirm it lands in the linked form's responses.
+- **Quirks mode.** Without a doctype, browsers emulate legacy layout rules — `box-sizing`,
+  percentage heights and `line-height` all compute differently than the CSS intends.
+- **Guessed encoding.** Without a charset the browser infers one, and a wrong guess turns
+  the Devanagari and Bangla text into mojibake.
+
+Note the doctype is the one change here that can *move pixels*: leaving quirks mode is a
+real rendering change. It's live and the layout was checked at 320, 390, 768 and 1280px
+wide, but if anything ever looks subtly off in a way that predates your content edits, this
+is the first thing to suspect.
+
+Still missing, harmlessly: there's no `<html>` or `<head>` wrapper. Browsers imply both, so
+it works — it's just not strictly valid HTML.
 
 ---
 
