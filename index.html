@@ -1154,8 +1154,8 @@ const CONFIG = {
     /* ---------- B · fallback, when no formId -------------
        WhatsApp wins if set (country code, digits only).
        Otherwise the guest's mail app opens, prefilled.     */
-    whatsApp: "",
-    email:    "rsvp@example.com"
+    whatsApp: "919748609947",
+    email:    "satyamkumar13254@gmail.com"
   },
 
   /* ---- 8. your files ------------------------------------ */
@@ -2474,6 +2474,13 @@ function boot(){
   img.alt = `${v(CONFIG.couple.a.name)} & ${v(CONFIG.couple.b.name)}`;
 
   applyLang(LANG);
+
+  /* The language control is live on the cover, unlike the music
+     button: the invocation is the first thing read, so the guest
+     needs to be able to switch script before the doors open.
+     (Music has to wait — audio can't start without a gesture.)  */
+  $('#langBtn').classList.remove('is-hidden');
+
   startCountdown();
   initScratch();
   initRsvp();
@@ -2498,9 +2505,9 @@ function boot(){
     catch { musicBtn.classList.add('is-muted'); }
     /* the controls arrive a little before the cover is gone, so
        they fade up over the last of it rather than popping in */
+    /* langBtn is already visible from boot — only music arrives here */
     setTimeout(() => {
       musicBtn.classList.remove('is-hidden');
-      langBtn.classList.remove('is-hidden');
     }, Math.max(0, OPEN_MS - 900));
     setTimeout(() => {
       document.body.classList.remove('is-locked');
