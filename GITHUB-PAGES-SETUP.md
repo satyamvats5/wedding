@@ -10,24 +10,41 @@ disturbing anything set up in Part 1.
 
 ## Status
 
-Already done locally:
+**Part 1 is complete. The site is live:**
 
-- [x] Git repo initialized in this directory
+### https://satyamvats5.github.io/wedding/
+
+- [x] Git repo initialized, first commit authored as `satyamvats5@gmail.com`
+      (configured **repo-local only**, in `.git/config` — global git config untouched)
 - [x] `index.html` created as a copy of `wedding-invitation.html` (Pages serves
       `index.html` as the site root)
 - [x] `.gitignore` added, excluding the unrelated diet-plan files and the working copy
-- [x] First commit made, authored as `satyamvats5@gmail.com`
-      (configured **repo-local only**, in `.git/config` — global git config untouched)
+- [x] Pushed to `github.com/satyamvats5/wedding` (public)
+- [x] Pages enabled via API — `main` branch, `/` root, build status `built`
+- [x] Verified: HTTP 200 over HTTPS, HSTS set, plain HTTP 301s to HTTPS, and the served
+      bytes are identical to local `index.html`
+- [x] `https_enforced` is `true`
 
-Remaining, and needs you:
+- [x] **RSVP form tested from the live URL** — submissions reach the Google Form correctly
+- [x] **`noindex` added** — `robots` and `googlebot` meta tags set to `noindex, nofollow`,
+      so search engines are asked not to list the page
 
-- [ ] `gh auth login` — requires a browser, so it can't be automated from here
-- [ ] Create the GitHub repo and push
-- [ ] Turn on Pages in repo settings
+Still open:
+
+- [ ] **Replace the `example.com` RSVP placeholder emails** with the real address.
+- [ ] **Consider adding `<!DOCTYPE html>` and `<meta charset="utf-8">`.** The file has
+      neither, so browsers render it in *quirks mode* and guess the text encoding. See
+      "Notes on this specific page" below.
+
+Part 2 (custom domain) is deferred and entirely optional.
 
 ---
 
-# Part 1 — Get it live (do this now)
+# Part 1 — Get it live  ✅ done
+
+Kept for reference / redoing from scratch.
+
+## Step 1 — Authenticate the GitHub CLI
 
 ## Step 1 — Authenticate the GitHub CLI
 
@@ -188,6 +205,29 @@ can point it at their own Pages site.
 - **Google Maps** embeds and search links — likewise fine
 
 No local images, CSS, or JS to move, so `index.html` is the entire site.
+
+### Missing doctype and charset
+
+The file begins directly with `<title>` — there's no `<!DOCTYPE html>`, no `<html>`/`<head>`
+wrapper, and no `<meta charset>`. It was written as an artifact *body*, which normally gets
+wrapped automatically at publish time; served as a standalone file, nothing wraps it.
+
+Browsers cope, but with two consequences:
+
+- **Quirks mode.** Without a doctype, browsers emulate legacy layout rules — `box-sizing`,
+  percentage heights, and `line-height` can all compute differently than intended.
+- **Guessed encoding.** Without a charset declaration the browser infers one. The page uses
+  Devanagari and Bangla text, so a wrong guess shows mojibake.
+
+The fix is two lines at the very top:
+
+```html
+<!DOCTYPE html>
+<meta charset="utf-8">
+```
+
+Worth doing, but test afterward: switching from quirks to standards mode can shift the
+layout, which is exactly why it hasn't been applied automatically.
 
 One thing to test on the live URL: the RSVP form submits to Google Forms, which is blocked
 in some preview environments but should work from real hosting. Send a test RSVP once the
