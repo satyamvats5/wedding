@@ -1,0 +1,5 @@
+.DS_Store
+
+# Unrelated files that live in this directory — keep them out of the public repo
+lean_bulk_diet_plan.pdf
+generate_lean_bulk_pdf.py

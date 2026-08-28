@@ -1,0 +1,2346 @@
+<title>Moonlit Vows</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Parisienne&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Tiro+Devanagari+Sanskrit:ital@0;1&display=swap">
+
+<style>
+/* ============================================================
+   MOONLIT VOWS — wedding invitation
+   Everything you need to change lives in the CONFIG block
+   at the top of the script at the bottom of this file.
+   ============================================================ */
+
+:root{
+  /* --- ink & ground --------------------------------------- */
+  --night:        #101733;
+  --night-deep:   #070b1c;
+  --night-haze:   #2a2f52;
+  --blush:        #f3dcda;
+  --blush-soft:   #faede8;
+  --cream:        #fdf7f3;
+  /* --- type colours --------------------------------------- */
+  --oxblood:      #6b211c;
+  --oxblood-soft: #8a413a;
+  --rose-ink:     #8a5f59;
+  --gold:         #d8a441;
+  --gold-pale:    #efcb86;
+  --ivory:        #f6ece2;
+  /* --- structure ------------------------------------------ */
+  --line:         rgba(107,33,28,.16);
+  --line-soft:    rgba(107,33,28,.09);
+  --shade:        rgba(107,33,28,.06);
+
+  --f-name:   'Great Vibes', 'Segoe Script', cursive;
+  --f-script: 'Parisienne', 'Great Vibes', cursive;
+  --f-serif:  'EB Garamond', Georgia, 'Times New Roman', serif;
+  --f-deva:   'Tiro Devanagari Sanskrit', 'Noto Serif Devanagari', Georgia, serif;
+
+  --col: 480px;          /* the phone-width content column */
+  --pad: clamp(22px, 6.5vw, 34px);
+}
+
+*,*::before,*::after{ box-sizing:border-box; }
+
+body{
+  margin:0;
+  background:
+    radial-gradient(120% 80% at 50% 0%, #efd9d7 0%, #e4c8c8 45%, #d8b9bb 100%)
+    fixed;
+  color:var(--oxblood);
+  font-family:var(--f-serif);
+  font-size:17px;
+  line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+}
+body.is-locked{ overflow:hidden; height:100vh; }
+
+img,svg,canvas{ display:block; max-width:100%; }
+button{ font:inherit; color:inherit; }
+
+:focus-visible{
+  outline:2px solid var(--gold);
+  outline-offset:3px;
+  border-radius:3px;
+}
+
+/* ---------- the column ------------------------------------ */
+.site{
+  width:min(100%, var(--col));
+  margin-inline:auto;
+  position:relative;
+  background:var(--blush);
+  box-shadow:0 0 90px rgba(74,20,24,.28);
+  overflow:clip;
+}
+
+/* ============================================================
+   1 · GATE COVER
+   ============================================================ */
+.cover{
+  position:fixed; inset:0; z-index:70;
+  display:grid; place-items:center;
+  background:var(--night-deep);
+  overflow:hidden;
+  transition:opacity .9s ease .9s, visibility .9s ease .9s;
+}
+.cover.is-open{ opacity:0; visibility:hidden; pointer-events:none; }
+
+.cover-stage{
+  position:relative;
+  width:min(100%, var(--col)); height:100%;
+  overflow:hidden;
+  background:#2b1c1a;
+}
+/* your own cover photo, when ASSETS.cover is set */
+.cover-photo{
+  position:absolute; inset:0;
+  background-size:cover; background-position:center;
+}
+#coverArt{ position:absolute; inset:0; width:100%; height:100%; }
+.cover-vignette{
+  position:absolute; inset:0;
+  background:
+    radial-gradient(85% 60% at 50% 42%, transparent 30%, rgba(38,16,16,.55) 100%),
+    linear-gradient(to bottom, rgba(30,12,14,.35) 0%, transparent 25%, rgba(30,12,14,.5) 100%);
+}
+
+/* the two swinging gate halves */
+.gate{
+  position:absolute; inset:0;
+  perspective:1400px; perspective-origin:50% 45%;
+}
+.gate-half{
+  position:absolute; top:0; bottom:0; width:50.4%;
+  transition:transform 1.9s cubic-bezier(.62,.02,.24,1);
+  will-change:transform;
+  backface-visibility:hidden;
+}
+.gate-half svg{ width:100%; height:100%; }
+.gate-half.l{ left:0;  transform-origin:left center;  }
+.gate-half.r{ right:0; transform-origin:right center; }
+.cover.is-open .gate-half.l{ transform:rotateY(-102deg); }
+.cover.is-open .gate-half.r{ transform:rotateY( 102deg); }
+
+.gate-bow{
+  position:absolute; left:50%; top:52%;
+  width:44%; translate:-50% -50%;
+  transition:opacity .5s ease, translate .9s ease, rotate .9s ease;
+  filter:drop-shadow(0 6px 14px rgba(40,14,16,.4));
+}
+.cover.is-open .gate-bow{ opacity:0; translate:-50% 60%; rotate:8deg; }
+
+/* ---------- Ganesha at the crown of the arch --------------
+   Sits OUTSIDE .gate on purpose: the doors swing away
+   beneath it, the blessing over the threshold stays put.   */
+.ganesha{
+  position:absolute; left:50%; top:4.5%;
+  translate:-50% 0;
+  z-index:6;
+  display:grid; justify-items:center; gap:9px;
+  width:max-content;
+  pointer-events:none;
+  animation:settle 1.5s cubic-bezier(.2,.7,.25,1) both;
+}
+@keyframes settle{
+  from{ opacity:0; translate:-50% -14px; }
+  to  { opacity:1; translate:-50% 0; }
+}
+/* a soft pool of shade so gold reads against the flowers */
+.ganesha::before{
+  content:''; position:absolute;
+  left:50%; top:44%; translate:-50% -50%;
+  width:260%; aspect-ratio:1;
+  background:radial-gradient(closest-side, rgba(38,16,16,.62), rgba(38,16,16,0) 72%);
+  z-index:-1;
+}
+.niche{
+  position:relative;
+  width:clamp(66px, 19vw, 92px);
+  aspect-ratio:100/116;
+  filter:drop-shadow(0 3px 10px rgba(30,10,12,.55));
+}
+.niche svg{ position:absolute; inset:0; width:100%; height:100%; }
+/* your image, clipped into the temple niche */
+.niche-art{
+  position:absolute; inset:0;
+  clip-path:url(#nicheClip);
+  background-size:cover; background-position:center 22%;
+  display:grid; place-items:center;
+}
+.niche-art.is-glyph{
+  background:radial-gradient(120% 100% at 50% 18%, rgba(255,238,205,.16), rgba(255,238,205,0) 70%);
+}
+/* the drawn idol is line art, so it is NOT clipped to the arch —
+   its ears are meant to graze the inner edge                    */
+.niche-idol{ pointer-events:none; }
+.niche.has-art .niche-idol{ display:none; }
+.niche.has-idol .niche-art{ display:none; }
+.niche-art .om{
+  font-family:var(--f-deva);
+  font-size:clamp(30px,8.6vw,42px);
+  line-height:1;
+  margin-top:14%;
+  color:var(--gold-pale);
+  text-shadow:0 2px 8px rgba(30,10,12,.6);
+}
+.invocation{
+  font-family:var(--f-deva);
+  font-size:clamp(12.5px,3.3vw,14.5px);
+  letter-spacing:.06em;
+  line-height:1.5;
+  color:var(--gold-pale);
+  text-shadow:0 2px 10px rgba(30,10,12,.8);
+  margin:0; text-align:center;
+  white-space:nowrap;
+}
+/* the same invocation, carried to the top of the hero */
+.hero-invocation{
+  margin-bottom:16px;
+  opacity:.92;
+  font-size:clamp(12px,3.2vw,14px);
+}
+
+.cover-cta{
+  position:absolute; left:0; right:0; bottom:19%;
+  display:flex; flex-direction:column; align-items:center; gap:10px;
+  background:none; border:0; cursor:pointer; padding:16px;
+  transition:opacity .5s ease;
+}
+.cover.is-open .cover-cta{ opacity:0; pointer-events:none; }
+.cover-cta .label{
+  font-family:var(--f-serif);
+  font-size:clamp(21px,5.6vw,26px);
+  letter-spacing:.1em;
+  color:var(--gold-pale);
+  text-shadow:0 2px 12px rgba(30,10,12,.75);
+}
+.cover-cta .pulse{
+  width:44px; height:44px; border-radius:50%;
+  border:1px solid rgba(239,203,134,.55);
+  display:grid; place-items:center;
+  animation:pulse 2.4s ease-in-out infinite;
+}
+.cover-cta .pulse svg{ width:16px; height:16px; stroke:var(--gold-pale); }
+@keyframes pulse{
+  0%,100%{ transform:scale(1);    box-shadow:0 0 0 0 rgba(239,203,134,.30); }
+  70%    { transform:scale(1.04); box-shadow:0 0 0 16px rgba(239,203,134,0); }
+}
+
+/* ============================================================
+   2 · NIGHT HERO
+   ============================================================ */
+.hero{
+  position:relative;
+  min-height:100vh; min-height:100dvh;
+  display:grid; align-content:center;
+  padding:16vh var(--pad) 12vh;
+  background:var(--night);
+  overflow:hidden;
+  isolation:isolate;
+}
+.hero-photo{ position:absolute; inset:0; background-size:cover; background-position:center; }
+#heroArt{ position:absolute; inset:0; width:100%; height:100%; }
+.hero-scrim{
+  position:absolute; inset:0;
+  background:
+    radial-gradient(70% 45% at 50% 30%, rgba(16,23,51,0) 0%, rgba(11,15,36,.55) 100%),
+    linear-gradient(to bottom, rgba(9,13,32,.5) 0%, rgba(9,13,32,.1) 38%, rgba(9,13,32,.78) 100%);
+}
+/* ornamental pillars framing the scene */
+.hero-frame{ position:absolute; inset:0; pointer-events:none; }
+.hero-frame svg{ width:100%; height:100%; }
+
+.hero-inner{ position:relative; text-align:center; }
+
+.eyebrow{
+  font-size:clamp(13px,3.4vw,15px);
+  letter-spacing:.34em; text-transform:uppercase;
+  color:rgba(246,236,226,.82);
+}
+.hero .eyebrow{ margin-bottom:6px; }
+.hero-heart{ margin:0 auto 18px; width:16px; fill:#f0c3c6; opacity:.9; }
+
+.names{ display:grid; gap:2px; }
+.name{
+  font-family:var(--f-name);
+  font-size:clamp(52px,15vw,74px);
+  line-height:1.02;
+  color:var(--gold);
+  background:linear-gradient(178deg,#f6dfa4 6%,#d8a441 52%,#b47c27 100%);
+  -webkit-background-clip:text; background-clip:text;
+  -webkit-text-fill-color:transparent;
+  filter:drop-shadow(0 3px 10px rgba(0,0,0,.45));
+  padding-bottom:.06em;
+}
+.parent{
+  font-size:clamp(13px,3.5vw,15px);
+  font-style:italic;
+  color:rgba(246,236,226,.9);
+  line-height:1.5;
+  margin:2px 0 0;
+  text-wrap:balance;
+}
+.amp{
+  font-family:var(--f-name);
+  font-size:clamp(34px,9vw,44px);
+  color:var(--gold-pale);
+  margin:10px 0 4px;
+  opacity:.95;
+}
+.hero-date{
+  margin-top:26px;
+  font-size:clamp(15px,4vw,17px);
+  letter-spacing:.2em; text-transform:uppercase;
+  color:var(--ivory);
+}
+.hero-date span{ display:block; letter-spacing:.12em; text-transform:none;
+  font-style:italic; font-size:.9em; opacity:.75; margin-top:5px; }
+
+.scroll-cue{
+  position:absolute; left:0; right:0; bottom:5.5vh;
+  display:grid; justify-items:center; gap:6px;
+  font-size:11px; letter-spacing:.4em; text-transform:uppercase;
+  color:rgba(246,236,226,.6);
+}
+.scroll-cue svg{ width:17px; stroke:rgba(246,236,226,.6); animation:nudge 2.2s ease-in-out infinite; }
+@keyframes nudge{ 0%,100%{ transform:translateY(0); } 50%{ transform:translateY(6px); } }
+
+/* ============================================================
+   3 · SECTIONS on blush
+   ============================================================ */
+.sec{
+  position:relative;
+  padding:clamp(56px,13vw,82px) var(--pad);
+}
+.sec.tint     { background:linear-gradient(to bottom, var(--blush-soft), var(--cream)); }
+.sec.tint-2   { background:var(--cream); }
+.sec.tint-3   { background:linear-gradient(to bottom, var(--cream), var(--blush-soft)); }
+.sec.pad-tight{ padding-top:clamp(34px,8vw,48px); }
+/* soften the seam where the night sky meets the blush */
+.seam{ height:70px; background:linear-gradient(to bottom, var(--night), var(--blush-soft)); }
+
+.sec-head{ text-align:center; margin-bottom:clamp(26px,7vw,38px); }
+.ico{ width:26px; height:26px; margin:0 auto 12px; stroke:var(--oxblood-soft); }
+.script{
+  font-family:var(--f-script);
+  font-weight:400;
+  font-size:clamp(31px,8.6vw,40px);
+  line-height:1.15;
+  color:var(--oxblood);
+  margin:0;
+  text-wrap:balance;
+}
+.rule{
+  display:flex; align-items:center; justify-content:center; gap:12px;
+  margin:14px auto 0; width:min(280px,72%);
+}
+.rule i{ flex:1; height:1px; background:linear-gradient(to right, transparent, var(--line), transparent); }
+.rule svg{ width:9px; fill:var(--oxblood-soft); opacity:.75; flex:none; }
+
+/* invitation note */
+.note{
+  text-align:center;
+  font-style:italic;
+  font-size:clamp(17px,4.6vw,19px);
+  line-height:1.72;
+  color:var(--oxblood-soft);
+  max-width:34ch; margin-inline:auto;
+  text-wrap:pretty;
+}
+.note + .note{ margin-top:16px; font-style:normal; font-size:clamp(15.5px,4.2vw,17px); color:var(--rose-ink); }
+
+/* ---------- scratch card --------------------------------- */
+.scratch-wrap{
+  position:relative;
+  width:min(320px, 82%);
+  aspect-ratio:100/86;
+  margin:6px auto 0;
+  touch-action:none;
+}
+.scratch-outline{ position:absolute; inset:0; }
+.scratch-outline path{ fill:none; stroke:var(--oxblood); stroke-width:.7; }
+.scratch-face{
+  position:absolute; inset:0;
+  display:grid; align-content:center; justify-items:center;
+  padding:22% 16% 20%;
+  text-align:center;
+}
+.scratch-face .invited{
+  font-style:italic; font-size:clamp(16px,4.4vw,18px);
+  color:var(--oxblood-soft); margin-bottom:4px;
+}
+.scratch-face .big-date{
+  font-weight:600; font-size:clamp(19px,5.2vw,23px);
+  letter-spacing:.01em; color:var(--oxblood);
+}
+.scratch-face .sub{ font-size:14.5px; color:var(--rose-ink); margin-top:2px; }
+.scratch-face .sub.time{ font-size:13px; opacity:.85; }
+#scratchCanvas{
+  position:absolute; inset:0; width:100%; height:100%;
+  clip-path:url(#heartClip);
+  cursor:grab;
+  transition:opacity .7s ease;
+}
+#scratchCanvas.is-done{ opacity:0; pointer-events:none; }
+.scratch-hint{
+  text-align:center; font-size:13px; font-style:italic;
+  color:var(--rose-ink); opacity:.8; margin-top:18px;
+  transition:opacity .4s ease;
+}
+.scratch-hint.is-hidden{ opacity:0; }
+#confetti{ position:fixed; inset:0; z-index:65; pointer-events:none; }
+
+/* ---------- photo card ----------------------------------- */
+.photo{
+  position:relative;
+  border-radius:2px;
+  overflow:hidden;
+  background:var(--shade);
+  box-shadow:0 14px 34px rgba(107,33,28,.14);
+}
+.photo::after{
+  content:''; position:absolute; inset:0;
+  border:1px solid rgba(253,247,243,.4);
+  pointer-events:none;
+}
+.photo img{ width:100%; height:100%; object-fit:cover; aspect-ratio:4/3; }
+.photo.tall img{ aspect-ratio:3/4; }
+.caption{
+  text-align:center; font-style:italic; font-size:14.5px;
+  color:var(--rose-ink); margin-top:12px;
+}
+
+/* ---------- countdown ------------------------------------ */
+.count{
+  display:grid; grid-template-columns:repeat(4,1fr);
+  gap:clamp(7px,2.4vw,12px);
+}
+.cell{
+  background:var(--cream);
+  border:1px solid var(--line-soft);
+  border-radius:3px;
+  padding:clamp(13px,3.6vw,18px) 4px clamp(10px,2.8vw,13px);
+  text-align:center;
+  box-shadow:0 3px 10px rgba(107,33,28,.05);
+}
+.cell b{
+  display:block;
+  font-weight:600;
+  font-size:clamp(26px,7.6vw,34px);
+  line-height:1;
+  color:var(--oxblood);
+  font-variant-numeric:tabular-nums lining-nums;
+}
+.cell span{
+  display:block; margin-top:7px;
+  font-size:10.5px; letter-spacing:.18em; text-transform:uppercase;
+  color:var(--rose-ink);
+}
+
+/* ---------- timeline ------------------------------------- */
+.timeline{ display:grid; gap:clamp(20px,5vw,26px); max-width:32ch; margin-inline:auto; }
+.tl-item{ display:grid; grid-template-columns:auto 1fr; gap:14px; align-items:start; }
+.tl-dot{
+  width:9px; height:9px; margin-top:9px; border-radius:50%;
+  background:var(--oxblood-soft);
+  box-shadow:0 0 0 4px rgba(138,65,58,.12);
+}
+.tl-item h3{
+  margin:0; font-weight:600;
+  font-size:clamp(17.5px,4.7vw,19.5px);
+  color:var(--oxblood);
+}
+.tl-item p{ margin:3px 0 0; font-size:15px; color:var(--rose-ink); font-variant-numeric:lining-nums; }
+.tl-item p.where{ font-style:italic; opacity:.9; }
+
+/* ---------- venue ---------------------------------------- */
+.venue-name{
+  text-align:center; font-weight:600;
+  font-size:clamp(21px,5.6vw,25px);
+  color:var(--oxblood);
+}
+.venue-city{ text-align:center; font-size:15.5px; color:var(--rose-ink); margin-top:4px; }
+.venue-addr{ text-align:center; font-size:14.5px; font-style:italic; color:var(--rose-ink); margin-top:8px; max-width:30ch; margin-inline:auto; }
+.map{
+  position:relative; margin-top:22px;
+  aspect-ratio:5/4; border-radius:3px; overflow:hidden;
+  border:1px solid var(--line-soft);
+  background:#e9e3dc;
+}
+.map canvas, .map iframe{ width:100%; height:100%; border:0; display:block; }
+.map-pill{
+  position:absolute; left:12px; top:12px;
+  display:inline-flex; align-items:center; gap:7px;
+  padding:8px 14px; border-radius:999px;
+  background:rgba(253,247,243,.93);
+  border:1px solid var(--line-soft);
+  box-shadow:0 3px 12px rgba(60,20,20,.16);
+  font-size:13.5px; color:var(--oxblood);
+  text-decoration:none;
+}
+.map-pill svg{ width:13px; stroke:var(--oxblood); }
+.map-pill:hover{ background:var(--cream); }
+
+/* ---------- simple info list ----------------------------- */
+.info{ display:grid; gap:20px; max-width:32ch; margin-inline:auto; }
+.info-row h3{ margin:0 0 3px; font-weight:600; font-size:17px; color:var(--oxblood); }
+.info-row p{ margin:0; font-size:15px; color:var(--rose-ink); }
+.body-line{
+  text-align:center; font-size:clamp(15.5px,4.2vw,17px);
+  color:var(--rose-ink); max-width:32ch; margin-inline:auto;
+  text-wrap:pretty;
+}
+
+/* ---------- RSVP form ------------------------------------ */
+.form{ display:grid; gap:17px; max-width:34ch; margin-inline:auto; }
+.field{ display:grid; gap:6px; }
+.field > label{
+  font-size:12.5px; letter-spacing:.12em; text-transform:uppercase;
+  color:var(--oxblood-soft);
+}
+.field .req{ color:var(--gold); }
+.field input,.field select,.field textarea{
+  font-family:var(--f-serif); font-size:16px;
+  color:var(--oxblood);
+  background:var(--cream);
+  border:0; border-bottom:1px solid var(--line);
+  border-radius:0;
+  padding:9px 2px;
+  width:100%;
+  appearance:none;
+}
+.field textarea{ resize:vertical; min-height:74px; line-height:1.55; }
+.field input::placeholder,.field textarea::placeholder{ color:rgba(138,95,89,.6); font-style:italic; }
+.field input:focus,.field select:focus,.field textarea:focus{
+  outline:none; border-bottom-color:var(--gold);
+}
+.select-wrap{ position:relative; }
+.select-wrap svg{
+  position:absolute; right:4px; top:50%; translate:0 -50%;
+  width:13px; stroke:var(--oxblood-soft); pointer-events:none;
+}
+.submit{
+  margin-top:6px; padding:15px;
+  background:var(--oxblood); color:var(--ivory);
+  border:0; border-radius:2px; cursor:pointer;
+  font-size:15px; letter-spacing:.1em;
+  transition:background .25s ease, transform .12s ease;
+}
+.submit:hover{ background:#571812; }
+.submit:active{ transform:translateY(1px); }
+.form-note{ font-size:13px; font-style:italic; color:var(--rose-ink); text-align:center; opacity:.8; }
+.thanks{
+  display:none; text-align:center;
+  padding:30px 10px;
+}
+.thanks.is-on{ display:block; }
+.thanks .script{ font-size:clamp(28px,7.4vw,34px); }
+.thanks p{ margin:10px 0 0; color:var(--rose-ink); font-size:15.5px; }
+.form.is-off{ display:none; }
+
+/* ---------- closing -------------------------------------- */
+.closing{
+  padding:clamp(60px,15vw,88px) var(--pad) clamp(72px,17vw,100px);
+  background:linear-gradient(to bottom, var(--blush-soft), var(--blush));
+  text-align:center;
+}
+.closing .script{ font-size:clamp(30px,8.2vw,38px); max-width:22ch; margin-inline:auto; }
+.closing .signature{
+  font-family:var(--f-name);
+  font-size:clamp(30px,8vw,38px);
+  color:var(--oxblood-soft);
+  margin-top:22px;
+}
+.closing .tag{
+  margin-top:16px; font-size:12.5px; letter-spacing:.22em;
+  text-transform:uppercase; color:var(--rose-ink); opacity:.75;
+}
+
+/* ============================================================
+   4 · FLOATING CONTROLS
+   ============================================================ */
+.ctl{
+  position:fixed; z-index:80;
+  display:inline-flex; align-items:center; gap:7px;
+  padding:9px 13px; border-radius:999px;
+  background:rgba(253,247,243,.9);
+  border:1px solid rgba(107,33,28,.14);
+  box-shadow:0 4px 16px rgba(60,20,20,.18);
+  backdrop-filter:blur(8px);
+  font-size:13px; color:var(--oxblood);
+  cursor:pointer;
+}
+.ctl:hover{ background:var(--cream); }
+.ctl svg{ width:15px; height:15px; flex:none; stroke:var(--oxblood); }
+#musicBtn{ top:calc(14px + env(safe-area-inset-top)); right:14px; padding:10px; }
+#musicBtn .off{ display:none; }
+#musicBtn.is-muted .on{ display:none; }
+#musicBtn.is-muted .off{ display:block; }
+#langBtn{ bottom:calc(16px + env(safe-area-inset-bottom)); left:14px; }
+.ctl.is-hidden{ opacity:0; pointer-events:none; }
+
+/* desktop: keep the controls hugging the column */
+@media (min-width:600px){
+  #musicBtn{ right:calc(50vw - var(--col)/2 + 14px); }
+  #langBtn { left: calc(50vw - var(--col)/2 + 14px); }
+}
+
+/* ============================================================
+   5 · REVEAL ON SCROLL
+   ============================================================ */
+.reveal{
+  opacity:0; transform:translateY(20px);
+  transition:opacity .85s cubic-bezier(.2,.7,.25,1), transform .85s cubic-bezier(.2,.7,.25,1);
+  transition-delay:var(--d,0ms);
+}
+.reveal.in{ opacity:1; transform:none; }
+
+/* ============================================================
+   6 · DEVANAGARI — the Latin display faces carry no Devanagari,
+   so Hindi mode swaps them out and rebalances the sizes.
+   ============================================================ */
+html[lang="hi"] body,
+html[lang="hi"] .field input,
+html[lang="hi"] .field select,
+html[lang="hi"] .field textarea{ font-family:var(--f-deva); }
+html[lang="hi"] .script{
+  font-family:var(--f-deva); font-style:italic;
+  font-size:clamp(24px,6.4vw,30px); line-height:1.35;
+}
+html[lang="hi"] .name{
+  font-family:var(--f-deva); font-style:normal;
+  font-size:clamp(38px,11vw,52px); line-height:1.25;
+  padding-bottom:0;
+}
+html[lang="hi"] .amp,
+html[lang="hi"] .signature{ font-family:var(--f-deva); }
+html[lang="hi"] .signature{ font-size:clamp(23px,6vw,28px); }
+html[lang="hi"] .note{ font-style:normal; line-height:1.85; }
+html[lang="hi"] .cell span,
+html[lang="hi"] .field > label{ letter-spacing:.04em; }
+html[lang="hi"] .eyebrow,
+html[lang="hi"] .hero-date{ letter-spacing:.12em; }
+
+@media (prefers-reduced-motion:reduce){
+  *{ animation-duration:.001ms !important; animation-iteration-count:1 !important; }
+  .reveal{ opacity:1; transform:none; transition:none; }
+  .gate-half{ transition-duration:.4s; }
+  .scroll-cue svg{ animation:none; }
+}
+</style>
+
+<!-- heart clip used by the scratch canvas -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <clipPath id="heartClip" clipPathUnits="objectBoundingBox">
+    <path transform="scale(0.01,0.0116279)"
+          d="M50,84 C22,64 4,45 4,27 C4,13 15,4 27,4 C37,4 45,10 50,18 C55,10 63,4 73,4 C85,4 96,13 96,27 C96,45 78,64 50,84 Z"/>
+  </clipPath>
+  <!-- the temple niche that holds the Ganesha image -->
+  <clipPath id="nicheClip" clipPathUnits="objectBoundingBox">
+    <path transform="scale(0.01,0.00862069)"
+          d="M15,110 V49 C15,27 31,11 50,11 C69,11 85,27 85,49 V110 Z"/>
+  </clipPath>
+</svg>
+
+<!-- ============================================================
+     GATE COVER
+     ============================================================ -->
+<div class="cover" id="cover">
+  <div class="cover-stage">
+    <div class="cover-photo" id="coverPhoto" hidden></div>
+    <canvas id="coverArt"></canvas>
+    <div class="cover-vignette"></div>
+
+    <div class="gate" aria-hidden="true">
+      <div class="gate-half l" id="gateL"></div>
+      <div class="gate-half r" id="gateR"></div>
+    </div>
+    <svg class="gate-bow" id="gateBow" viewBox="0 0 200 150" aria-hidden="true"></svg>
+
+    <div class="ganesha" id="ganesha">
+      <div class="niche">
+        <svg class="niche-frame" id="nicheFrame" viewBox="0 0 100 116" aria-hidden="true"></svg>
+        <div class="niche-art is-glyph" id="nicheArt" role="img"></div>
+        <svg class="niche-idol" id="nicheIdol" viewBox="0 0 100 116" aria-hidden="true"></svg>
+      </div>
+      <p class="invocation" id="coverInvocation"></p>
+    </div>
+
+    <button class="cover-cta" id="openBtn" type="button">
+      <span class="label" data-i18n="tapToOpen">tap to open</span>
+      <span class="pulse" data-ico="chevronDown"></span>
+    </button>
+  </div>
+</div>
+
+<canvas id="confetti" aria-hidden="true"></canvas>
+
+<button class="ctl is-hidden" id="musicBtn" type="button" aria-label="Toggle music">
+  <span class="on"  data-ico="volumeOn"></span>
+  <span class="off" data-ico="volumeOff"></span>
+</button>
+<button class="ctl is-hidden" id="langBtn" type="button">
+  <span data-ico="globe"></span><span id="langLabel">हिन्दी</span>
+</button>
+
+<!-- ============================================================
+     THE INVITATION
+     ============================================================ -->
+<main class="site" id="site">
+
+  <!-- ---------- night hero ---------- -->
+  <section class="hero" id="hero">
+    <div class="hero-photo" id="heroPhoto" hidden></div>
+    <canvas id="heroArt"></canvas>
+    <div class="hero-scrim"></div>
+    <div class="hero-frame" id="heroFrame" aria-hidden="true"></div>
+
+    <div class="hero-inner">
+      <p class="invocation hero-invocation" id="heroInvocation"></p>
+      <p class="eyebrow" data-i18n="gettingMarried">We're getting married</p>
+      <svg class="hero-heart" data-ico="heartSolid" aria-hidden="true"></svg>
+
+      <div class="names">
+        <h1 class="name" id="nameA">Aarav</h1>
+        <p class="parent" id="parentA"></p>
+        <div class="amp">&amp;</div>
+        <h1 class="name" id="nameB">Meera</h1>
+        <p class="parent" id="parentB"></p>
+      </div>
+
+      <p class="hero-date" id="heroDate"></p>
+    </div>
+
+    <div class="scroll-cue">
+      <span data-i18n="scroll">Scroll</span>
+      <svg data-ico="chevronDown" aria-hidden="true"></svg>
+    </div>
+  </section>
+
+  <div class="seam" aria-hidden="true"></div>
+
+  <!-- ---------- invitation note ---------- -->
+  <section class="sec tint pad-tight">
+    <div class="rule reveal" aria-hidden="true"></div>
+    <p class="note reveal" style="--d:80ms" data-i18n="celebration"></p>
+    <p class="note reveal" style="--d:160ms" data-i18n="inviteLine"></p>
+    <div class="rule reveal" style="--d:240ms;margin-top:30px" aria-hidden="true"></div>
+  </section>
+
+  <!-- ---------- scratch to reveal ---------- -->
+  <section class="sec tint-2">
+    <div class="sec-head reveal">
+      <h2 class="script" data-i18n="scratchTitle"></h2>
+      <div class="rule" aria-hidden="true"></div>
+    </div>
+
+    <div class="scratch-wrap reveal" id="scratchWrap" style="--d:100ms">
+      <svg class="scratch-outline" viewBox="0 0 100 86" aria-hidden="true">
+        <path d="M50,84 C22,64 4,45 4,27 C4,13 15,4 27,4 C37,4 45,10 50,18 C55,10 63,4 73,4 C85,4 96,13 96,27 C96,45 78,64 50,84 Z"/>
+      </svg>
+      <div class="scratch-face">
+        <p class="invited" data-i18n="youreInvited"></p>
+        <p class="big-date" id="revealDate"></p>
+        <p class="sub" id="revealDay"></p>
+        <p class="sub time" id="revealTime"></p>
+      </div>
+      <canvas id="scratchCanvas" role="img"></canvas>
+    </div>
+    <p class="scratch-hint reveal" id="scratchHint" style="--d:180ms" data-i18n="scratchHint"></p>
+  </section>
+
+  <!-- ---------- couple photo ---------- -->
+  <section class="sec tint-3 pad-tight">
+    <div class="photo reveal"><img id="photoMain" alt=""></div>
+    <p class="caption reveal" style="--d:120ms" data-i18n="photoCaption"></p>
+  </section>
+
+  <!-- ---------- countdown ---------- -->
+  <section class="sec tint-2">
+    <div class="sec-head reveal">
+      <svg class="ico" data-ico="heartLine" aria-hidden="true"></svg>
+      <h2 class="script" data-i18n="countdownTitle"></h2>
+      <div class="rule" aria-hidden="true"></div>
+    </div>
+    <div class="count reveal" style="--d:100ms" id="countdown" role="timer" aria-live="off"></div>
+    <p class="body-line reveal" style="--d:180ms;margin-top:24px" id="countdownNote"></p>
+  </section>
+
+  <!-- ---------- program timeline ---------- -->
+  <section class="sec tint">
+    <div class="sec-head reveal">
+      <svg class="ico" data-ico="clock" aria-hidden="true"></svg>
+      <h2 class="script" data-i18n="timelineTitle"></h2>
+      <div class="rule" aria-hidden="true"></div>
+    </div>
+    <div class="timeline" id="timeline"></div>
+  </section>
+
+  <!-- ---------- venues (rendered) ---------- -->
+  <div id="venues"></div>
+
+  <!-- ---------- pre-wedding events ---------- -->
+  <section class="sec tint-2" id="preEventsSec">
+    <div class="sec-head reveal">
+      <svg class="ico" data-ico="sparkle" aria-hidden="true"></svg>
+      <h2 class="script" data-i18n="preEventsTitle"></h2>
+      <div class="rule" aria-hidden="true"></div>
+    </div>
+    <div class="info" id="preEvents"></div>
+  </section>
+
+  <!-- ---------- transportation ---------- -->
+  <section class="sec tint">
+    <div class="sec-head reveal">
+      <svg class="ico" data-ico="car" aria-hidden="true"></svg>
+      <h2 class="script" data-i18n="transportTitle"></h2>
+      <div class="rule" aria-hidden="true"></div>
+    </div>
+    <p class="body-line reveal" style="--d:100ms" id="transportText"></p>
+  </section>
+
+  <!-- ---------- gifts ---------- -->
+  <section class="sec tint-2">
+    <div class="sec-head reveal">
+      <svg class="ico" data-ico="gift" aria-hidden="true"></svg>
+      <h2 class="script" data-i18n="giftsTitle"></h2>
+      <div class="rule" aria-hidden="true"></div>
+    </div>
+    <p class="body-line reveal" style="--d:100ms" id="giftsText"></p>
+  </section>
+
+  <!-- ---------- RSVP ---------- -->
+  <section class="sec tint-3" id="rsvp">
+    <div class="sec-head reveal">
+      <svg class="ico" data-ico="envelope" aria-hidden="true"></svg>
+      <h2 class="script" data-i18n="rsvpTitle"></h2>
+      <div class="rule" aria-hidden="true"></div>
+    </div>
+
+    <form class="form reveal" id="rsvpForm" style="--d:100ms" novalidate>
+      <div class="field">
+        <label for="f-name"><span data-i18n="fName"></span> <span class="req">*</span></label>
+        <input id="f-name" name="name" type="text" required autocomplete="name" data-i18n-ph="fNamePh">
+      </div>
+      <div class="field">
+        <label for="f-email"><span data-i18n="fEmail"></span> <span class="req">*</span></label>
+        <input id="f-email" name="email" type="email" required autocomplete="email" data-i18n-ph="fEmailPh">
+      </div>
+      <div class="field">
+        <label for="f-guests" data-i18n="fGuests"></label>
+        <input id="f-guests" name="guests" type="number" min="1" max="20" step="1" inputmode="numeric" data-i18n-ph="fGuestsPh">
+      </div>
+      <div class="field">
+        <label for="f-attend"><span data-i18n="fAttend"></span> <span class="req">*</span></label>
+        <div class="select-wrap">
+          <select id="f-attend" name="attending" required>
+            <option value="" data-i18n="fSelect"></option>
+            <option value="yes" data-i18n="fYes"></option>
+            <option value="no"  data-i18n="fNo"></option>
+          </select>
+          <svg data-ico="chevronDown" aria-hidden="true"></svg>
+        </div>
+      </div>
+      <div class="field">
+        <label for="f-msg" data-i18n="fMessage"></label>
+        <textarea id="f-msg" name="message" rows="3" data-i18n-ph="fMessagePh"></textarea>
+      </div>
+      <button class="submit" type="submit" data-i18n="fSend"></button>
+      <p class="form-note" id="formNote"></p>
+    </form>
+
+    <div class="thanks" id="thanks" role="status">
+      <h3 class="script" data-i18n="thanksTitle"></h3>
+      <p data-i18n="thanksBody"></p>
+    </div>
+  </section>
+
+  <!-- ---------- closing ---------- -->
+  <section class="closing">
+    <div class="rule reveal" style="margin-bottom:26px" aria-hidden="true"></div>
+    <h2 class="script reveal" style="--d:80ms" data-i18n="closingLine"></h2>
+    <p class="signature reveal" id="signature" style="--d:160ms"></p>
+    <p class="tag reveal" id="hashtag" style="--d:220ms"></p>
+  </section>
+</main>
+
+<script>
+/* ================================================================
+   ███  CONFIG — everything you edit lives here  ███
+   ----------------------------------------------------------------
+   Any text can be either a plain string ("Aarav") or a pair
+   { en:"…", hi:"…" } if you want the Hindi/English toggle to work.
+   ================================================================ */
+const CONFIG = {
+
+  /* ---- 0. the invocation -------------------------------- */
+  /* Ganesha sits at the crown of the gate — invoked first,
+     above the threshold, before the doors open. Set
+     assets.ganesha (section 8) to your own image and it fills
+     the niche; until then the niche holds a gold ॐ.
+     Set `invocation: null` to drop the text line entirely. */
+  invocation: { en: "॥ श्री गणेशाय नमः ॥", hi: "॥ श्री गणेशाय नमः ॥" },
+
+  /* What sits in the niche:
+       "idol" — the drawn gold Ganesha (default)
+       "om"   — the ॐ glyph, if you prefer no figure
+     Either way, assets.ganesha overrides both.            */
+  ganeshaStyle: "idol",
+
+  /* ---- 1. the couple ------------------------------------ */
+  couple: {
+    a: { name: "Aarav",
+         parents: { en: "Son of Shri Rajesh Sharma & Smt. Anita Sharma",
+                    hi: "श्री राजेश शर्मा एवं श्रीमती अनीता शर्मा के सुपुत्र" } },
+    b: { name: "Meera",
+         parents: { en: "Daughter of Shri Viren Iyer & Smt. Shaila Iyer",
+                    hi: "श्री वीरेन अय्यर एवं श्रीमती शैला अय्यर की सुपुत्री" } },
+    hashtag: "#AaravWedsMeera"
+  },
+
+  /* ---- 2. the date -------------------------------------- */
+  /* ISO 8601 with your offset. This drives the countdown,
+     the scratch card and the "Add to calendar" link.        */
+  weddingAt: "2026-12-13T08:00:00+05:30",
+
+  /* ---- 3. program timeline ------------------------------ */
+  timeline: [
+    { title: { en: "Mehendi",          hi: "मेहंदी" },
+      when:  { en: "Fri, 11 Dec 2026 · 4:00 PM",  hi: "शुक्र, 11 दिस 2026 · सायं 4:00" },
+      where: { en: "Courtyard Lawn",   hi: "आँगन लॉन" } },
+    { title: { en: "Haldi",            hi: "हल्दी" },
+      when:  { en: "Sat, 12 Dec 2026 · 9:00 AM",  hi: "शनि, 12 दिस 2026 · प्रातः 9:00" },
+      where: { en: "Poolside",         hi: "पूल के पास" } },
+    { title: { en: "Sangeet",          hi: "संगीत" },
+      when:  { en: "Sat, 12 Dec 2026 · 7:30 PM",  hi: "शनि, 12 दिस 2026 · सायं 7:30" },
+      where: { en: "Grand Ballroom",   hi: "ग्रैंड बॉलरूम" } },
+    { title: { en: "Wedding Ceremony", hi: "विवाह संस्कार" },
+      when:  { en: "Sun, 13 Dec 2026 · 8:00 AM",  hi: "रवि, 13 दिस 2026 · प्रातः 8:00" },
+      where: { en: "Royal Lawn",       hi: "रॉयल लॉन" } },
+    { title: { en: "Dinner Reception", hi: "स्वागत भोज" },
+      when:  { en: "Sun, 13 Dec 2026 · 8:00 PM",  hi: "रवि, 13 दिस 2026 · रात्रि 8:00" },
+      where: { en: "The Terrace",      hi: "द टेरेस" } }
+  ],
+
+  /* ---- 4. venues ---------------------------------------- */
+  venues: [
+    { label: { en: "Wedding Venue", hi: "विवाह स्थल" },
+      name:  "The Leela Palace",
+      city:  { en: "Old Airport Road, Bengaluru", hi: "ओल्ड एयरपोर्ट रोड, बेंगलुरु" },
+      addr:  { en: "23 Kodihalli, HAL Old Airport Rd, Bengaluru 560008",
+               hi: "23 कोडिहल्ली, एचएएल ओल्ड एयरपोर्ट रोड, बेंगलुरु 560008" },
+      maps:  "The Leela Palace Bengaluru",
+      /* Paste a Google Maps embed URL here to show a real map when you
+         host this file yourself. Leave "" for the drawn map. */
+      embed: "" },
+    { label: { en: "Reception Venue", hi: "स्वागत समारोह स्थल" },
+      name:  "The Terrace, Leela Palace",
+      city:  { en: "Old Airport Road, Bengaluru", hi: "ओल्ड एयरपोर्ट रोड, बेंगलुरु" },
+      addr:  { en: "Rooftop, Tower Wing · Entry from Gate 2",
+               hi: "छत, टॉवर विंग · गेट 2 से प्रवेश" },
+      maps:  "The Leela Palace Bengaluru",
+      embed: "" }
+  ],
+
+  /* ---- 5. pre-wedding events ---------------------------- */
+  preEvents: [
+    { title: { en: "Welcome Dinner",   hi: "स्वागत भोज" },
+      body:  { en: "Thu, 10 Dec · 8:00 PM · Citrus, Ground Floor",
+               hi: "गुरु, 10 दिस · रात्रि 8:00 · सिट्रस, भूतल" } },
+    { title: { en: "Ganesh Puja",      hi: "गणेश पूजा" },
+      body:  { en: "Fri, 11 Dec · 10:00 AM · Sharma Residence, Indiranagar",
+               hi: "शुक्र, 11 दिस · प्रातः 10:00 · शर्मा निवास, इंदिरानगर" } },
+    { title: { en: "Cocktail Evening", hi: "कॉकटेल संध्या" },
+      body:  { en: "Sat, 12 Dec · 10:00 PM · The Library Bar",
+               hi: "शनि, 12 दिस · रात्रि 10:00 · द लाइब्रेरी बार" } }
+  ],
+
+  /* ---- 6. odds and ends --------------------------------- */
+  transport: { en: "Shuttles run from Kempegowda International Airport and from The Leela lobby every 30 minutes on 12 and 13 December. Valet parking is available at Gate 2.",
+               hi: "12 और 13 दिसंबर को केम्पेगौड़ा अंतर्राष्ट्रीय हवाई अड्डे तथा द लीला लॉबी से हर 30 मिनट पर शटल उपलब्ध रहेंगी। गेट 2 पर वैले पार्किंग की सुविधा है।" },
+  gifts:     { en: "Your presence and your blessings are the only gifts we need.",
+               hi: "आपकी उपस्थिति और आशीर्वाद ही हमारे लिए सबसे बड़ा उपहार है।" },
+  rsvpBy:    { en: "Kindly respond by 20 November 2026",
+               hi: "कृपया 20 नवंबर 2026 तक उत्तर दें" },
+
+  /* ---- 7. where RSVPs go -------------------------------- */
+  rsvp: {
+
+    /* ---------- A · GOOGLE FORM (recommended) ------------
+       Responses land straight in a Google Sheet. The guest
+       never leaves this page — no Google branding, no tab
+       switch, just your form posting quietly in the back.
+
+       SET IT UP  (about five minutes)
+
+       1 · Make a Google Form with these five questions,
+           in any order, named however you like:
+              Name        — Short answer
+              Email       — Short answer
+              Guests      — Short answer
+              Attending   — Multiple choice, two options
+              Message     — Paragraph
+           Turn OFF "Limit to 1 response" (it would force
+           guests to sign in to Google).
+
+       2 · FORM ID.  Hit Send ▸ the 🔗 link tab ▸ Copy.
+           You get something like
+             https://docs.google.com/forms/d/e/1FAIpQL…Xy9/viewform
+           Everything between  /d/e/  and  /viewform  is the
+           formId. Paste it below.
+
+       3 · ENTRY IDS.  In the form editor open the ⋮ menu
+           (top right) ▸ "Get pre-filled link". Type a word
+           you'll recognise into every box — literally
+           "NAME", "EMAIL", "GUESTS", "MESSAGE" — pick an
+           Attending option, then ▸ Get link ▸ Copy link.
+           The copied URL reads:
+             …/viewform?usp=pp_url&entry.1234567=NAME
+               &entry.7654321=EMAIL&entry.…=GUESTS…
+           Each number is that question's entry id. Match
+           them up below — digits only, no "entry." prefix.
+
+       4 · ATTENDING OPTIONS.  Copy your two multiple-choice
+           options into attendingYes / attendingNo below,
+           EXACTLY as typed in the form — capitals, commas
+           and all. Google silently drops values that don't
+           match one of its options.
+
+       Leave formId "" and the form quietly falls back to
+       WhatsApp or email (section B).
+
+       NOTE  Google submission is blocked inside the
+       claude.ai artifact preview by its security policy.
+       Test it from the local file or your own hosting.     */
+    googleForm: {
+      formId:  "1FAIpQLSddDcjv8A7FrfjTIRQllPTbvYmrooXXfksTdPnlOtqYrc4duA",
+      entries: {
+        name:      "1310345432",
+        email:     "121099131",
+        guests:    "48036142",
+        attending: "626739375",
+        message:   "1056939180"
+      },
+      /* verified against the live form schema — these are the two
+         multiple-choice options exactly as Google has them stored */
+      attendingYes: "Joyfully accepts",
+      attendingNo:  "Regretfully declines",
+      /* Only if your form has "Collect email addresses" ON.
+         Then Google demands its own built-in email field
+         and this must stay true.                           */
+      collectsEmail: false
+    },
+
+    /* ---------- B · fallback, when no formId -------------
+       WhatsApp wins if set (country code, digits only).
+       Otherwise the guest's mail app opens, prefilled.     */
+    whatsApp: "",
+    email:    "rsvp@example.com"
+  },
+
+  /* ---- 8. your files ------------------------------------ */
+  /* Drop in data URIs ("data:image/jpeg;base64,…") for a single
+     self-contained file, or plain paths ("images/hero.jpg") if you
+     keep the images beside this HTML.
+     Leave a value "" and a drawn placeholder is used instead.  */
+  assets: {
+    cover:   "",  // the gate / entrance photo behind the cover
+    hero:    "",  // the night backdrop behind the names
+    photo:   "",  // the couple photo (4:3 works best)
+    song:    "",  // "data:audio/mpeg;base64,…" or "audio/song.mp3"
+    /* Ganesha for the niche at the crown of the gate.
+       Portrait-ish crops sit best — the niche is roughly 1:1.16
+       and is anchored near the top, so the face lands well.
+       A PNG with a transparent background looks best of all. */
+    ganesha: ""
+  }
+};
+
+/* ================================================================
+   Strings (UI chrome). Guest-facing content comes from CONFIG.
+   ================================================================ */
+const STRINGS = {
+  en: {
+    tapToOpen:"tap to open", scroll:"Scroll", gettingMarried:"We're getting married",
+    celebration:"A celebration of love, joy, and togetherness",
+    inviteLine:"We warmly invite you to be a part of this special day, and to bless the beginning of a beautiful forever.",
+    scratchTitle:"Scratch to Reveal", youreInvited:"You're Invited!",
+    scratchHint:"Drag across the heart to uncover the date",
+    photoCaption:"Where it all began",
+    countdownTitle:"Counting Down to Forever",
+    days:"Days", hours:"Hours", minutes:"Minutes", seconds:"Seconds",
+    addToCal:"Add to your calendar",
+    theDayIsHere:"Today is the day.",
+    timelineTitle:"Program Timeline", preEventsTitle:"Pre-Wedding Events",
+    transportTitle:"Transportation", giftsTitle:"Gifts", rsvpTitle:"RSVP",
+    openInMaps:"Open in Maps",
+    fName:"Your Name", fNamePh:"Your full name",
+    fEmail:"Email", fEmailPh:"you@example.com",
+    fGuests:"Number of Guests", fGuestsPh:"1",
+    fAttend:"Will you be attending?", fSelect:"Select…",
+    fYes:"Joyfully accepts", fNo:"Regretfully declines",
+    fMessage:"Your Message", fMessagePh:"Write your wishes…",
+    fSend:"Send Message", fSending:"Sending…",
+    thanksTitle:"Thank you!", thanksBody:"Your response is on its way to us.",
+    formErr:"Please fill in your name, email and whether you'll be joining us.",
+    formFail:"That didn't go through. Opening WhatsApp so you can send it directly.",
+    closingLine:"We can't wait to celebrate with you!",
+    langOther:"हिन्दी"
+  },
+  hi: {
+    tapToOpen:"खोलने के लिए स्पर्श करें", scroll:"नीचे देखें", gettingMarried:"हम विवाह करने जा रहे हैं",
+    celebration:"प्रेम, आनंद और साथ का एक उत्सव",
+    inviteLine:"हम आपको इस विशेष दिन का हिस्सा बनने और एक सुंदर सदा-सदा की शुरुआत को आशीर्वाद देने के लिए सादर आमंत्रित करते हैं।",
+    scratchTitle:"खुरचकर देखिए", youreInvited:"आप आमंत्रित हैं!",
+    scratchHint:"तारीख़ देखने के लिए दिल पर उँगली फिराएँ",
+    photoCaption:"जहाँ से सब शुरू हुआ",
+    countdownTitle:"सदा की ओर गिनती",
+    days:"दिन", hours:"घंटे", minutes:"मिनट", seconds:"सेकंड",
+    addToCal:"कैलेंडर में जोड़ें",
+    theDayIsHere:"आज वही दिन है।",
+    timelineTitle:"कार्यक्रम सूची", preEventsTitle:"विवाह-पूर्व कार्यक्रम",
+    transportTitle:"आवागमन", giftsTitle:"उपहार", rsvpTitle:"उत्तर दें",
+    openInMaps:"मैप में खोलें",
+    fName:"आपका नाम", fNamePh:"आपका पूरा नाम",
+    fEmail:"ईमेल", fEmailPh:"you@example.com",
+    fGuests:"अतिथियों की संख्या", fGuestsPh:"1",
+    fAttend:"क्या आप पधारेंगे?", fSelect:"चुनें…",
+    fYes:"सहर्ष स्वीकार", fNo:"क्षमा सहित असमर्थ",
+    fMessage:"आपका संदेश", fMessagePh:"अपनी शुभकामनाएँ लिखें…",
+    fSend:"संदेश भेजें", fSending:"भेजा जा रहा है…",
+    thanksTitle:"धन्यवाद!", thanksBody:"आपका उत्तर हमारे पास पहुँच रहा है।",
+    formErr:"कृपया अपना नाम, ईमेल और उपस्थिति की जानकारी भरें।",
+    formFail:"संदेश नहीं जा सका। सीधे भेजने के लिए व्हाट्सएप खोल रहे हैं।",
+    closingLine:"हम आपके साथ जश्न मनाने के लिए उत्सुक हैं!",
+    langOther:"English"
+  }
+};
+
+/* ================================================================
+   Small helpers
+   ================================================================ */
+let LANG = 'en';
+const t  = k => (STRINGS[LANG][k] ?? STRINGS.en[k] ?? k);
+const v  = x => (x && typeof x === 'object') ? (x[LANG] ?? x.en ?? '') : (x ?? '');
+const $  = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const WEDDING = new Date(CONFIG.weddingAt);
+
+const el = (tag, cls, html) => {
+  const n = document.createElement(tag);
+  if (cls) n.className = cls;
+  if (html != null) n.innerHTML = html;
+  return n;
+};
+
+/* line icons, drawn once and stamped wherever data-ico appears */
+const ICONS = {
+  chevronDown:'<polyline points="4 8 12 16 20 8"/>',
+  clock:'<circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 16 14"/>',
+  pin:'<path d="M12 21s7-6.4 7-11a7 7 0 1 0-14 0c0 4.6 7 11 7 11z"/><circle cx="12" cy="10" r="2.6"/>',
+  envelope:'<rect x="3" y="6" width="18" height="13" rx="1.6"/><polyline points="3.6 7 12 13.4 20.4 7"/>',
+  gift:'<rect x="3" y="9" width="18" height="12" rx="1.4"/><path d="M3 13h18M12 9v12"/><path d="M12 9C10 9 7.5 8.4 7.5 6.3A2.3 2.3 0 0 1 12 6c0-1.6 4.5-1.6 4.5 .3C16.5 8.4 14 9 12 9z"/>',
+  car:'<path d="M4 16v-3.2L6.1 8h11.8L20 12.8V16"/><rect x="2.6" y="16" width="18.8" height="3.2" rx="1.2"/><circle cx="7.2" cy="19.4" r="1.5"/><circle cx="16.8" cy="19.4" r="1.5"/>',
+  sparkle:'<path d="M12 3.4l1.9 5.1 5.1 1.9-5.1 1.9L12 17.4l-1.9-5.1L5 10.4l5.1-1.9z"/><path d="M18.6 16.2l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8z"/>',
+  globe:'<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.6 3 2.6 15 0 18M12 3c-2.6 3-2.6 15 0 18"/>',
+  volumeOn:'<path d="M4 9.5h3.2L12 5.4v13.2L7.2 14.5H4z"/><path d="M16 9.2a4 4 0 0 1 0 5.6M18.6 6.8a7.6 7.6 0 0 1 0 10.4"/>',
+  volumeOff:'<path d="M4 9.5h3.2L12 5.4v13.2L7.2 14.5H4z"/><path d="M16.4 9.6l5 4.8M21.4 9.6l-5 4.8"/>',
+  arrowOut:'<path d="M14 4h6v6"/><path d="M20 4l-8.4 8.4"/><path d="M18 14.6V20H4V6h5.4"/>',
+  heartLine:'<path d="M12 20.4C6.6 16.6 3 13 3 9.2A4.9 4.9 0 0 1 12 6.6 4.9 4.9 0 0 1 21 9.2c0 3.8-3.6 7.4-9 11.2z"/>',
+  heartSolid:'<path d="M50,84 C22,64 4,45 4,27 C4,13 15,4 27,4 C37,4 45,10 50,18 C55,10 63,4 73,4 C85,4 96,13 96,27 C96,45 78,64 50,84 Z"/>'
+};
+function paintIcons(root = document){
+  $$('[data-ico]', root).forEach(node => {
+    const key = node.dataset.ico, d = ICONS[key];
+    if (!d) return;
+    const solid = key === 'heartSolid';
+    if (node.tagName.toLowerCase() === 'svg'){
+      node.setAttribute('viewBox', solid ? '0 0 100 86' : '0 0 24 24');
+      node.setAttribute('fill', solid ? 'currentColor' : 'none');
+      if (!solid){
+        node.setAttribute('stroke-width','1.3');
+        node.setAttribute('stroke-linecap','round');
+        node.setAttribute('stroke-linejoin','round');
+      }
+      node.innerHTML = d;
+    } else {
+      node.innerHTML =
+        `<svg viewBox="${solid ? '0 0 100 86' : '0 0 24 24'}" fill="${solid ? 'currentColor' : 'none'}"
+              stroke="currentColor" stroke-width="1.3" stroke-linecap="round"
+              stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
+    }
+    delete node.dataset.ico;
+  });
+}
+function paintRules(root = document){
+  $$('.rule', root).forEach(r => {
+    if (r.childElementCount) return;
+    r.innerHTML = `<i></i><svg viewBox="0 0 100 86" fill="currentColor">${ICONS.heartSolid}</svg><i></i>`;
+  });
+}
+
+/* a soft placeholder so the layout reads properly before your photos land */
+function placeholderPhoto(w, h, label){
+  const svg =
+   `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">
+      <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#eddad6"/><stop offset="1" stop-color="#dcbfc0"/>
+      </linearGradient></defs>
+      <rect width="${w}" height="${h}" fill="url(#g)"/>
+      <g fill="none" stroke="#8a5f59" stroke-opacity=".45" stroke-width="1.4">
+        <path transform="translate(${w/2 - 34} ${h/2 - 42}) scale(0.68)"
+              d="M50,84 C22,64 4,45 4,27 C4,13 15,4 27,4 C37,4 45,10 50,18 C55,10 63,4 73,4 C85,4 96,13 96,27 C96,45 78,64 50,84 Z"/>
+      </g>
+      <text x="50%" y="${h/2 + 44}" text-anchor="middle" fill="#8a5f59" fill-opacity=".75"
+            font-family="Georgia,serif" font-size="15" letter-spacing="2.2">${label}</text>
+    </svg>`;
+  return 'data:image/svg+xml;utf8,' + encodeURIComponent(svg.replace(/\s+/g,' '));
+}
+
+/* ================================================================
+   Canvas art — the gate, the night sky, the little maps
+   ================================================================ */
+function fitCanvas(cv){
+  const dpr = Math.min(devicePixelRatio || 1, 2);
+  const r = cv.getBoundingClientRect();
+  const w = Math.max(1, Math.round(r.width)), h = Math.max(1, Math.round(r.height));
+  cv.width = w * dpr; cv.height = h * dpr;
+  const ctx = cv.getContext('2d');
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  return { ctx, w, h };
+}
+
+/* --- cover backdrop: a floral arch over warm light ------------- */
+function drawCoverArt(){
+  const cv = $('#coverArt'); if (!cv) return;
+  const { ctx, w, h } = fitCanvas(cv);
+
+  const warm = ctx.createLinearGradient(0, 0, 0, h);
+  warm.addColorStop(0,   '#4a2f26');
+  warm.addColorStop(.32, '#8a5b41');
+  warm.addColorStop(.62, '#c98f66');
+  warm.addColorStop(1,   '#6d4230');
+  ctx.fillStyle = warm; ctx.fillRect(0, 0, w, h);
+
+  /* bokeh behind the gate */
+  for (let i = 0; i < 70; i++){
+    const x = ((i * 97) % 100) / 100 * w;
+    const y = h * .18 + ((i * 61) % 100) / 100 * h * .7;
+    const r = 2 + ((i * 37) % 9);
+    const g = ctx.createRadialGradient(x, y, 0, x, y, r * 3.4);
+    g.addColorStop(0, 'rgba(255,231,186,.55)');
+    g.addColorStop(1, 'rgba(255,231,186,0)');
+    ctx.fillStyle = g;
+    ctx.beginPath(); ctx.arc(x, y, r * 3.4, 0, 6.284); ctx.fill();
+  }
+
+  /* the floral arch: clustered blush roses along a shallow curve */
+  const rose = (x, y, r, tint) => {
+    for (let k = 0; k < 5; k++){
+      const a = k / 5 * 6.284 + (x % 3);
+      ctx.fillStyle = tint[k % tint.length];
+      ctx.beginPath();
+      ctx.ellipse(x + Math.cos(a) * r * .55, y + Math.sin(a) * r * .55, r * .62, r * .52, a, 0, 6.284);
+      ctx.fill();
+    }
+    ctx.fillStyle = 'rgba(255,250,244,.9)';
+    ctx.beginPath(); ctx.arc(x, y, r * .3, 0, 6.284); ctx.fill();
+  };
+  const tints = ['#f6e3dc','#eccfc6','#e3bcb2','#fbf1ea','#dfae9f'];
+  const leaf  = ['#5f6a48','#4a5438','#6f7a54'];
+
+  for (let i = 0; i < 190; i++){
+    const tx = i / 189;
+    const x  = tx * w;
+    const band = h * .16 + Math.sin(Math.PI * tx) * -h * .045;
+    const y  = band + ((i * 53) % 100) / 100 * h * .17;
+    if (((i * 29) % 7) < 2){
+      ctx.fillStyle = leaf[i % 3];
+      ctx.beginPath();
+      ctx.ellipse(x, y, 9, 3.4, (i % 5) - 2, 0, 6.284); ctx.fill();
+    } else {
+      rose(x, y, 7 + ((i * 41) % 8), tints);
+    }
+  }
+  /* hanging strands of tiny blossoms */
+  for (let s = 0; s < 26; s++){
+    const x0 = (s + .5) / 26 * w + ((s * 17) % 11) - 5;
+    const len = h * (.10 + ((s * 23) % 17) / 100);
+    for (let j = 0; j < len / 11; j++){
+      const y = h * .26 + j * 11;
+      ctx.fillStyle = j % 3 ? 'rgba(250,238,229,.82)' : 'rgba(232,204,192,.8)';
+      ctx.beginPath(); ctx.arc(x0 + Math.sin(j * .8) * 3, y, 3.1, 0, 6.284); ctx.fill();
+    }
+  }
+  /* polished floor */
+  const floor = ctx.createLinearGradient(0, h * .82, 0, h);
+  floor.addColorStop(0, 'rgba(88,52,38,.15)');
+  floor.addColorStop(1, 'rgba(48,26,20,.6)');
+  ctx.fillStyle = floor; ctx.fillRect(0, h * .82, w, h * .18);
+}
+
+/* --- the ornate gate halves (SVG so they stay crisp while swinging) */
+function gateSvg(side){
+  const scroll = (x, y, s, flip) => `
+    <g transform="translate(${x} ${y}) scale(${flip ? -s : s} ${s})" >
+      <path d="M0 0 C 0 -10 9 -14 14 -8 C 18 -3 12 3 7 1 C 2 -1 4 -7 9 -6"/>
+      <path d="M0 0 C -3 8 3 15 10 13"/>
+    </g>`;
+  let ornament = '';
+  for (let r = 0; r < 7; r++){
+    for (let c = 0; c < 3; c++){
+      ornament += scroll(24 + c * 52, 96 + r * 108, 1.5, (r + c) % 2);
+    }
+  }
+  let bars = '';
+  for (let i = 0; i < 9; i++){
+    const x = 12 + i * 21.5;
+    bars += `<line x1="${x}" y1="58" x2="${x}" y2="860"/>`;
+  }
+  const inner = side === 'l' ? '' : ' transform="scale(-1,1) translate(-200,0)"';
+  return `
+  <svg viewBox="0 0 200 900" preserveAspectRatio="none" aria-hidden="true">
+    <defs>
+      <linearGradient id="gm-${side}" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0"   stop-color="#fdf3ea" stop-opacity=".95"/>
+        <stop offset=".55" stop-color="#e8cfc0" stop-opacity=".9"/>
+        <stop offset="1"   stop-color="#c9a58f" stop-opacity=".92"/>
+      </linearGradient>
+    </defs>
+    <g${inner} fill="none" stroke="url(#gm-${side})" stroke-width="2.4"
+       stroke-linecap="round" stroke-linejoin="round">
+      <path d="M4 900 V 78 Q 4 34 100 30 L 196 30 V 900" stroke-width="4.4"/>
+      <path d="M4 58 Q 100 46 196 46" stroke-width="2"/>
+      <line x1="4" y1="452" x2="196" y2="452" stroke-width="4"/>
+      <line x1="4" y1="740" x2="196" y2="740" stroke-width="3"/>
+      ${bars}
+      ${ornament}
+      <circle cx="100" cy="452" r="15" stroke-width="2.6"/>
+      <circle cx="100" cy="452" r="6"  stroke-width="1.6"/>
+    </g>
+  </svg>`;
+}
+
+/* --- the temple niche: a pointed arch, rays and a finial ------ */
+function nicheSvg(){
+  const rays = Array.from({ length: 11 }, (_, i) => {
+    const a = Math.PI * (0.14 + i * 0.072);          // sweep across the dome
+    const cx = 50, cy = 49, r0 = 41, r1 = 47.5;
+    const x0 = cx - Math.cos(a) * r0, y0 = cy - Math.sin(a) * r0;
+    const x1 = cx - Math.cos(a) * r1, y1 = cy - Math.sin(a) * r1;
+    return `<line x1="${x0.toFixed(1)}" y1="${y0.toFixed(1)}"
+                  x2="${x1.toFixed(1)}" y2="${y1.toFixed(1)}" stroke-width=".9"/>`;
+  }).join('');
+  return `
+  <defs>
+    <linearGradient id="ng" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0"   stop-color="#f7e2ad"/>
+      <stop offset=".48" stop-color="#d8a441"/>
+      <stop offset="1"   stop-color="#a9752a"/>
+    </linearGradient>
+  </defs>
+  <g fill="none" stroke="url(#ng)" stroke-linecap="round" stroke-linejoin="round">
+    ${rays}
+    <path d="M15,110 V49 C15,27 31,11 50,11 C69,11 85,27 85,49 V110" stroke-width="2.1"/>
+    <path d="M19.5,110 V49.5 C19.5,29.5 33.5,15.5 50,15.5 C66.5,15.5 80.5,29.5 80.5,49.5 V110"
+          stroke-width=".85" stroke-opacity=".8"/>
+    <path d="M50,11 V4.5" stroke-width="1.6"/>
+    <circle cx="50" cy="3" r="2.4" stroke-width="1.3"/>
+    <path d="M11,110 H89" stroke-width="2.4"/>
+    <path d="M14,113.6 H86" stroke-width="1"/>
+    <path d="M28,110 q22,-9 44,0" stroke-width=".8" stroke-opacity=".55"/>
+  </g>`;
+}
+
+/* --- Ganesha, drawn as gold line art -------------------------
+   Authored in a roomy 120x142 space, then scaled into the
+   niche's 100x116 so the ears just graze the arch. Stroke
+   weights are tuned for ~70px on screen: anything finer than
+   about 2 units in this space disappears on a phone.
+   Trunk curves to the viewer's left — Vamamukhi, the
+   orientation used for household worship.                     */
+function ganeshaSvg(){
+  /* Ears are open arcs that begin and end at the head's edge, so
+     they read as fans beside the head rather than loops across it. */
+  const EAR_L = 'M40,47 C28,45 18,53 18,63 C18,74 28,81 40,77';
+  const EAR_R = 'M80,47 C92,45 102,53 102,63 C102,74 92,81 80,77';
+  const CROWN = 'M50,42 C50,28 54,19 60,17 C66,19 70,28 70,42';
+
+  /* lotus seat */
+  const petals = Array.from({ length: 5 }, (_, i) => {
+    const w = 72 / 5, x0 = 24 + i * w;
+    return `M${x0.toFixed(1)},120 Q${(x0 + w / 2).toFixed(1)},106 ${(x0 + w).toFixed(1)},120`;
+  }).join(' ');
+
+  return `
+  <defs>
+    <linearGradient id="gi" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0"   stop-color="#fbeaba"/>
+      <stop offset=".5"  stop-color="#dcaa4b"/>
+      <stop offset="1"   stop-color="#a9752a"/>
+    </linearGradient>
+  </defs>
+
+  <g transform="translate(4.4,8.9) scale(0.76)">
+
+    <!-- a wash so the figure has mass, not just outline -->
+    <g fill="url(#gi)" opacity=".16" stroke="none">
+      <path d="${CROWN} Z"/>
+      <path d="${EAR_L} Z"/>
+      <path d="${EAR_R} Z"/>
+      <ellipse cx="60" cy="62" rx="21" ry="19"/>
+    </g>
+
+    <g fill="none" stroke="url(#gi)" stroke-width="2.2"
+       stroke-linecap="round" stroke-linejoin="round">
+
+      <!-- mukut: finial, dome, band, jewel -->
+      <circle cx="60" cy="12" r="2.6" stroke-width="1.6"/>
+      <path d="M60,14.6 V17" stroke-width="1.6"/>
+      <path d="${CROWN}"/>
+      <path d="M47,42 H73"/>
+      <circle cx="60" cy="32" r="2.2" stroke-width="1.5"/>
+
+      <!-- head and ears -->
+      <ellipse cx="60" cy="62" rx="21" ry="19" stroke-width="2.4"/>
+      <path d="${EAR_L}"/>
+      <path d="${EAR_R}"/>
+      <path d="M36,54 C29,54 25,58 25,63" stroke-width="1.3"/>
+      <path d="M84,54 C91,54 95,58 95,63" stroke-width="1.3"/>
+
+      <!-- face: tilak, brows, eyes -->
+      <path d="M60,47 V53" stroke-width="1.6"/>
+      <path d="M45.5,53 C48.5,50.5 53,50.5 55.5,52.5" stroke-width="1.2"/>
+      <path d="M74.5,53 C71.5,50.5 67,50.5 64.5,52.5" stroke-width="1.2"/>
+      <circle cx="51" cy="60" r="1.7" fill="url(#gi)" stroke="none"/>
+      <circle cx="69" cy="60" r="1.7" fill="url(#gi)" stroke="none"/>
+
+      <!-- trunk: thick at the brow, curling to the viewer's left -->
+      <path d="M58,78 C57,88 52,96 45,98 C38,100 34,95 37,90.5 C39,87.5 43.5,88 44.5,91.5"
+            stroke-width="6.4"/>
+      <path d="M41,95.5 C37.5,97 35,94.5 36.5,91.5" stroke-width="3"/>
+
+      <!-- Ekadanta: the single tusk -->
+      <path d="M69,80 L74,90" stroke-width="2.2"/>
+
+      <!-- lotus seat and plinth -->
+      <path d="${petals}" stroke-width="1.6"/>
+      <path d="M20,120 H100" stroke-width="2.2"/>
+      <path d="M26,125 H94"  stroke-width="1.1"/>
+    </g>
+  </g>`;
+}
+
+/* --- the satin bow with its pearl drop ------------------------ */
+function bowSvg(){
+  return `
+  <defs>
+    <linearGradient id="satin" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0"   stop-color="#fffaf4"/>
+      <stop offset=".45" stop-color="#f2ddd0"/>
+      <stop offset="1"   stop-color="#d8b8a4"/>
+    </linearGradient>
+  </defs>
+  <g fill="url(#satin)" stroke="rgba(150,110,90,.35)" stroke-width="1">
+    <path d="M96 44 C 62 8 20 14 22 42 C 24 68 66 62 96 48 Z"/>
+    <path d="M104 44 C 138 8 180 14 178 42 C 176 68 134 62 104 48 Z"/>
+    <path d="M92 52 C 78 92 70 120 62 148 L 92 138 L 98 58 Z"/>
+    <path d="M108 52 C 122 92 130 120 138 148 L 108 138 L 102 58 Z"/>
+    <ellipse cx="100" cy="46" rx="13" ry="12"/>
+  </g>
+  <g fill="#f6e6d5" stroke="rgba(150,110,90,.3)" stroke-width=".7">
+    <circle cx="100" cy="62" r="4"/><circle cx="100" cy="72" r="3.4"/>
+    <circle cx="100" cy="81" r="2.9"/><circle cx="100" cy="89" r="2.4"/>
+  </g>`;
+}
+
+/* --- the night hero: moon, palace, fairy lights --------------- */
+let heroRAF = 0;
+function drawHeroArt(){
+  const cv = $('#heroArt'); if (!cv) return;
+  const { ctx, w, h } = fitCanvas(cv);
+
+  const stars = Array.from({ length: 130 }, (_, i) => ({
+    x: ((i * 73) % 997) / 997 * w,
+    y: ((i * 149) % 613) / 613 * h * .62,
+    r: .5 + ((i * 31) % 13) / 13 * 1.1,
+    p: ((i * 17) % 100) / 100 * 6.284
+  }));
+  const flakes = Array.from({ length: 46 }, (_, i) => ({
+    x: ((i * 197) % 811) / 811 * w,
+    y: ((i * 89)  % 733) / 733 * h,
+    r: .7 + ((i * 41) % 10) / 10 * 1.5,
+    s: .12 + ((i * 23) % 10) / 10 * .3,
+    d: ((i * 53) % 100) / 100 * 6.284
+  }));
+
+  const moonX = w * .5, moonY = h * .27, moonR = Math.min(w, h) * .135;
+
+  function frame(ms){
+    const tt = ms / 1000;
+
+    /* sky */
+    const sky = ctx.createLinearGradient(0, 0, 0, h);
+    sky.addColorStop(0,   '#080c22');
+    sky.addColorStop(.34, '#151d40');
+    sky.addColorStop(.60, '#2b2a52');
+    sky.addColorStop(.80, '#4a3350');
+    sky.addColorStop(1,   '#1b1730');
+    ctx.fillStyle = sky; ctx.fillRect(0, 0, w, h);
+
+    /* stars */
+    stars.forEach(s => {
+      const a = .35 + .45 * (.5 + .5 * Math.sin(tt * 1.1 + s.p));
+      ctx.fillStyle = `rgba(233,235,255,${a})`;
+      ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, 6.284); ctx.fill();
+    });
+
+    /* moon halo + disc */
+    const halo = ctx.createRadialGradient(moonX, moonY, moonR * .8, moonX, moonY, moonR * 3.6);
+    halo.addColorStop(0, 'rgba(226,231,255,.30)');
+    halo.addColorStop(1, 'rgba(226,231,255,0)');
+    ctx.fillStyle = halo;
+    ctx.beginPath(); ctx.arc(moonX, moonY, moonR * 3.6, 0, 6.284); ctx.fill();
+
+    const disc = ctx.createRadialGradient(moonX - moonR * .3, moonY - moonR * .35, moonR * .1,
+                                          moonX, moonY, moonR);
+    disc.addColorStop(0,  '#fbfaf6');
+    disc.addColorStop(.7, '#e6e4dd');
+    disc.addColorStop(1,  '#c9c8c4');
+    ctx.fillStyle = disc;
+    ctx.beginPath(); ctx.arc(moonX, moonY, moonR, 0, 6.284); ctx.fill();
+    ctx.save();
+    ctx.beginPath(); ctx.arc(moonX, moonY, moonR, 0, 6.284); ctx.clip();
+    ctx.fillStyle = 'rgba(160,158,158,.22)';
+    [[-.32,-.18,.22],[.24,.06,.16],[-.06,.34,.19],[.34,-.36,.11],[-.44,.16,.09]]
+      .forEach(([dx, dy, rr]) => {
+        ctx.beginPath();
+        ctx.arc(moonX + dx * moonR, moonY + dy * moonR, rr * moonR, 0, 6.284);
+        ctx.fill();
+      });
+    ctx.restore();
+
+    /* palace silhouette with lit windows */
+    const base = h * .70;
+    ctx.fillStyle = '#120f26';
+    ctx.beginPath(); ctx.moveTo(0, base);
+    const towers = [
+      [.10,.09],[.20,.15],[.30,.11],[.40,.20],[.50,.26],
+      [.60,.20],[.70,.11],[.80,.15],[.90,.09]
+    ];
+    towers.forEach(([tx, th]) => {
+      const x = tx * w, tw = w * .052, top = base - h * th;
+      ctx.lineTo(x - tw, base); ctx.lineTo(x - tw, top + h * .022);
+      ctx.quadraticCurveTo(x, top - h * .026, x + tw, top + h * .022);
+      ctx.lineTo(x + tw, base);
+    });
+    ctx.lineTo(w, base); ctx.lineTo(w, h); ctx.lineTo(0, h); ctx.closePath(); ctx.fill();
+
+    towers.forEach(([tx, th], i) => {
+      for (let k = 0; k < 3; k++){
+        const x = tx * w + (k - 1) * w * .020;
+        const y = base - h * th * (.30 + k * .16) + h * .05;
+        const a = .5 + .4 * Math.sin(tt * .7 + i * 1.7 + k);
+        ctx.fillStyle = `rgba(255,206,126,${a * .85})`;
+        ctx.fillRect(x - 1.5, y, 3, 6);
+      }
+    });
+
+    /* water and its shimmer */
+    const water = ctx.createLinearGradient(0, base, 0, h);
+    water.addColorStop(0, 'rgba(120,96,132,.5)');
+    water.addColorStop(1, 'rgba(24,20,42,.9)');
+    ctx.fillStyle = water; ctx.fillRect(0, base, w, h - base);
+    for (let i = 0; i < 26; i++){
+      const y = base + (i / 26) * (h - base);
+      const a = .16 * (1 - i / 26);
+      ctx.strokeStyle = `rgba(226,231,255,${a})`;
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      const off = Math.sin(tt * .9 + i * .6) * w * .05;
+      ctx.moveTo(moonX - w * .12 + off, y); ctx.lineTo(moonX + w * .12 + off, y);
+      ctx.stroke();
+    }
+
+    /* fairy-light garland strung across the top */
+    for (let g = 0; g < 2; g++){
+      const sag = h * (.052 + g * .028), y0 = h * (.035 + g * .045);
+      ctx.strokeStyle = 'rgba(232,214,196,.22)'; ctx.lineWidth = 1;
+      ctx.beginPath();
+      for (let p = 0; p <= 60; p++){
+        const tx = p / 60, x = tx * w, y = y0 + Math.sin(Math.PI * tx) * sag;
+        p ? ctx.lineTo(x, y) : ctx.moveTo(x, y);
+      }
+      ctx.stroke();
+      for (let p = 0; p <= 22; p++){
+        const tx = p / 22, x = tx * w, y = y0 + Math.sin(Math.PI * tx) * sag;
+        const a = .45 + .4 * Math.sin(tt * 1.5 + p * .9 + g);
+        const gl = ctx.createRadialGradient(x, y, 0, x, y, 7);
+        gl.addColorStop(0, `rgba(255,214,150,${a})`);
+        gl.addColorStop(1, 'rgba(255,214,150,0)');
+        ctx.fillStyle = gl; ctx.beginPath(); ctx.arc(x, y, 7, 0, 6.284); ctx.fill();
+        ctx.fillStyle = `rgba(255,244,224,${a})`;
+        ctx.beginPath(); ctx.arc(x, y, 1.5, 0, 6.284); ctx.fill();
+      }
+    }
+
+    /* drifting sparkle */
+    flakes.forEach(f => {
+      f.y += f.s; if (f.y > h) { f.y = -4; }
+      const x = f.x + Math.sin(tt * .5 + f.d) * 9;
+      ctx.fillStyle = 'rgba(255,246,232,.5)';
+      ctx.beginPath(); ctx.arc(x, f.y, f.r, 0, 6.284); ctx.fill();
+    });
+
+    if (!reduceMotion) heroRAF = requestAnimationFrame(frame);
+  }
+  cancelAnimationFrame(heroRAF);
+  frame(reduceMotion ? 1400 : performance.now());
+}
+
+/* --- ornamental pillars framing the hero --------------------- */
+function heroFrameSvg(){
+  const col = side => {
+    const dir = side === 'l' ? 1 : -1;
+    const x   = side === 'l' ? 0 : 100;
+    return `
+    <g transform="translate(${x} 0) scale(${dir} 1)" fill="none"
+       stroke="url(#pil)" stroke-width=".55" stroke-linecap="round">
+      <path d="M3.4 100 V 16 M9.6 100 V 16"/>
+      <path d="M2 16 H 11 M2.6 13.6 H 10.4 M3.4 11.4 H 9.6"/>
+      <path d="M1.6 20 H 11.4 M1.6 96 H 11.4"/>
+      <circle cx="6.5" cy="9.4" r="1.5"/>
+      <path d="M6.5 7.9 V 5.6"/>
+      <path d="M11 16 Q 30 6 50 4.4" stroke-width=".45"/>
+      <path d="M11 20.6 Q 31 10.6 50 9" stroke-width=".3"/>
+      ${Array.from({ length: 11 }, (_, i) => {
+        const tx = .08 + i * .085, px = 11 + tx * 39, py = 16 - tx * 11.4 + tx * tx * 1.4;
+        return `<path d="M${px} ${py} v ${2.6 + (i % 3)}"/><circle cx="${px}" cy="${py + 3.2 + (i % 3)}" r=".55"/>`;
+      }).join('')}
+      ${Array.from({ length: 7 }, (_, i) =>
+        `<circle cx="6.5" cy="${26 + i * 10}" r="1.05"/>`).join('')}
+    </g>`;
+  };
+  return `
+  <svg viewBox="0 0 100 100" preserveAspectRatio="none">
+    <defs><linearGradient id="pil" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0"   stop-color="#f0d6b4" stop-opacity=".62"/>
+      <stop offset=".55" stop-color="#e6c39c" stop-opacity=".34"/>
+      <stop offset="1"   stop-color="#e6c39c" stop-opacity=".08"/>
+    </linearGradient></defs>
+    ${col('l')}${col('r')}
+  </svg>`;
+}
+
+/* --- a quiet stylised street map ----------------------------- */
+function drawMiniMap(cv, seed){
+  const { ctx, w, h } = fitCanvas(cv);
+  let s = seed * 9301 + 49297;
+  const rnd = () => (s = (s * 9301 + 49297) % 233280) / 233280;
+
+  ctx.fillStyle = '#f1ebe4'; ctx.fillRect(0, 0, w, h);
+
+  /* water */
+  ctx.fillStyle = '#cfdfe0';
+  ctx.beginPath();
+  ctx.moveTo(0, h * (.55 + rnd() * .2));
+  ctx.quadraticCurveTo(w * .3, h * (.42 + rnd() * .2), w * .18, h);
+  ctx.lineTo(0, h); ctx.closePath(); ctx.fill();
+
+  /* blocks */
+  for (let i = 0; i < 42; i++){
+    const x = rnd() * w, y = rnd() * h;
+    const bw = 14 + rnd() * 46, bh = 12 + rnd() * 38;
+    ctx.fillStyle = rnd() > .78 ? '#e2ecdc' : '#e7dfd6';
+    ctx.fillRect(x, y, bw, bh);
+  }
+  /* roads */
+  const road = (pts, wid, col) => {
+    ctx.strokeStyle = col; ctx.lineWidth = wid; ctx.lineCap = 'round';
+    ctx.beginPath(); pts.forEach(([x, y], i) => i ? ctx.lineTo(x, y) : ctx.moveTo(x, y));
+    ctx.stroke();
+  };
+  for (let i = 0; i < 6; i++){
+    const y = h * (.12 + i * .16 + rnd() * .04);
+    road([[0, y], [w * .45, y + (rnd() - .5) * 22], [w, y + (rnd() - .5) * 30]], 2.2, '#ffffff');
+  }
+  for (let i = 0; i < 5; i++){
+    const x = w * (.14 + i * .2 + rnd() * .05);
+    road([[x, 0], [x + (rnd() - .5) * 20, h * .5], [x + (rnd() - .5) * 30, h]], 2, '#ffffff');
+  }
+  road([[w * .06, 0], [w * .34, h * .46], [w * .3, h]], 5.6, '#f6d98f');
+  road([[0, h * .34], [w * .5, h * .3], [w, h * .44]], 4.4, '#f6d98f');
+
+  /* the pin */
+  const px = w * .5, py = h * .46;
+  ctx.fillStyle = 'rgba(107,33,28,.16)';
+  ctx.beginPath(); ctx.ellipse(px, py + 15, 11, 4, 0, 0, 6.284); ctx.fill();
+  ctx.fillStyle = '#6b211c';
+  ctx.beginPath();
+  ctx.arc(px, py, 10, Math.PI * .82, Math.PI * .18);
+  ctx.lineTo(px, py + 19); ctx.closePath(); ctx.fill();
+  ctx.fillStyle = '#f3dcda';
+  ctx.beginPath(); ctx.arc(px, py - 1, 3.7, 0, 6.284); ctx.fill();
+
+  /* paper tint so it sits with the palette */
+  ctx.fillStyle = 'rgba(233,196,196,.16)'; ctx.fillRect(0, 0, w, h);
+}
+
+/* ================================================================
+   Content rendering
+   ================================================================ */
+function renderStatic(){
+  const c = CONFIG.couple;
+  $('#nameA').textContent   = v(c.a.name);
+  $('#nameB').textContent   = v(c.b.name);
+  $('#parentA').textContent = v(c.a.parents);
+  $('#parentB').textContent = v(c.b.parents);
+  $('#signature').textContent = `${v(c.a.name)} & ${v(c.b.name)}`;
+  $('#hashtag').textContent   = c.hashtag || '';
+
+  const loc  = LANG === 'hi' ? 'hi-IN' : 'en-IN';
+  const long = WEDDING.toLocaleDateString(loc, { day:'numeric', month:'long', year:'numeric' });
+  const day  = WEDDING.toLocaleDateString(loc, { weekday:'long' });
+  const time = WEDDING.toLocaleTimeString(loc, { hour:'numeric', minute:'2-digit' });
+
+  $('#heroDate').innerHTML = `${long}<span>${day} · ${time} · ${v(CONFIG.venues[0].city)}</span>`;
+  $('#revealDate').textContent = long;
+  $('#revealDay').textContent  = day;
+  $('#revealTime').textContent = time;
+
+  /* the invocation, on the gate and again atop the hero */
+  const inv = CONFIG.invocation ? v(CONFIG.invocation) : '';
+  ['#coverInvocation', '#heroInvocation'].forEach(sel => {
+    const n = $(sel); if (!n) return;
+    n.textContent = inv;
+    n.hidden = !inv;
+  });
+  const art = $('#nicheArt');
+  if (art) art.setAttribute('aria-label', inv || 'Shree Ganesha');
+
+  $('#transportText').textContent = v(CONFIG.transport);
+  $('#giftsText').textContent     = v(CONFIG.gifts);
+  $('#formNote').textContent      = v(CONFIG.rsvpBy);
+
+  /* countdown footnote doubles as the calendar link */
+  const note = $('#countdownNote');
+  note.innerHTML = '';
+  const a = el('a', 'map-pill');
+  a.style.position = 'static';
+  a.href = calendarUrl();
+  a.target = '_blank'; a.rel = 'noopener';
+  a.innerHTML = `<span data-ico="sparkle"></span><span>${t('addToCal')}</span>`;
+  note.appendChild(a);
+  paintIcons(note);
+}
+
+function calendarUrl(){
+  const pad = n => String(n).padStart(2, '0');
+  const z = d => d.getUTCFullYear() + pad(d.getUTCMonth() + 1) + pad(d.getUTCDate())
+              + 'T' + pad(d.getUTCHours()) + pad(d.getUTCMinutes()) + '00Z';
+  const end = new Date(WEDDING.getTime() + 4 * 3600e3);
+  const q = new URLSearchParams({
+    action:'TEMPLATE',
+    text:`${v(CONFIG.couple.a.name)} & ${v(CONFIG.couple.b.name)} — Wedding`,
+    dates:`${z(WEDDING)}/${z(end)}`,
+    location:`${v(CONFIG.venues[0].name)}, ${v(CONFIG.venues[0].city)}`,
+    details:CONFIG.couple.hashtag || ''
+  });
+  return 'https://calendar.google.com/calendar/render?' + q;
+}
+
+function renderTimeline(){
+  const box = $('#timeline'); box.innerHTML = '';
+  CONFIG.timeline.forEach((e, i) => {
+    const row = el('div', 'tl-item reveal');
+    row.style.setProperty('--d', `${i * 90}ms`);
+    row.innerHTML =
+      `<span class="tl-dot"></span>
+       <div>
+         <h3>${v(e.title)}</h3>
+         <p>${v(e.when)}</p>
+         ${e.where ? `<p class="where">${v(e.where)}</p>` : ''}
+       </div>`;
+    box.appendChild(row);
+  });
+}
+
+function renderVenues(){
+  const box = $('#venues'); box.innerHTML = '';
+  CONFIG.venues.forEach((ven, i) => {
+    const sec = el('section', `sec ${i % 2 ? 'tint' : 'tint-3'}`);
+    const mapInner = ven.embed
+      ? `<iframe src="${ven.embed}" loading="lazy" title="${v(ven.name)}"
+                 referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>`
+      : `<canvas class="mini-map" data-seed="${i + 3}"></canvas>`;
+    sec.innerHTML = `
+      <div class="sec-head reveal">
+        <svg class="ico" data-ico="pin" aria-hidden="true"></svg>
+        <h2 class="script">${v(ven.label)}</h2>
+        <div class="rule" aria-hidden="true"></div>
+      </div>
+      <p class="venue-name reveal" style="--d:80ms">${v(ven.name)}</p>
+      <p class="venue-city reveal" style="--d:120ms">${v(ven.city)}</p>
+      <p class="venue-addr reveal" style="--d:160ms">${v(ven.addr)}</p>
+      <div class="map reveal" style="--d:220ms">
+        ${mapInner}
+        <a class="map-pill" target="_blank" rel="noopener"
+           href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(ven.maps || v(ven.name))}">
+          <span data-ico="arrowOut"></span><span>${t('openInMaps')}</span>
+        </a>
+      </div>`;
+    box.appendChild(sec);
+  });
+  paintIcons(box); paintRules(box);
+  $$('.mini-map', box).forEach(cv => drawMiniMap(cv, +cv.dataset.seed));
+  observeReveals(box);
+}
+
+function renderPreEvents(){
+  const box = $('#preEvents'); box.innerHTML = '';
+  if (!CONFIG.preEvents?.length){ $('#preEventsSec').hidden = true; return; }
+  CONFIG.preEvents.forEach((e, i) => {
+    const row = el('div', 'info-row reveal');
+    row.style.setProperty('--d', `${i * 90}ms`);
+    row.innerHTML = `<h3>${v(e.title)}</h3><p>${v(e.body)}</p>`;
+    box.appendChild(row);
+  });
+}
+
+/* ================================================================
+   Countdown
+   ================================================================ */
+function startCountdown(){
+  const box = $('#countdown');
+  const keys = ['days','hours','minutes','seconds'];
+  box.innerHTML = keys.map(k =>
+    `<div class="cell"><b data-k="${k}">00</b><span data-i18n="${k}">${t(k)}</span></div>`).join('');
+  const out = {};
+  keys.forEach(k => out[k] = box.querySelector(`[data-k="${k}"]`));
+
+  const tick = () => {
+    let ms = WEDDING - Date.now();
+    if (ms <= 0){
+      box.innerHTML = `<p class="body-line" style="grid-column:1/-1">${t('theDayIsHere')}</p>`;
+      clearInterval(id); return;
+    }
+    const s = Math.floor(ms / 1000);
+    const val = {
+      days:    Math.floor(s / 86400),
+      hours:   Math.floor(s % 86400 / 3600),
+      minutes: Math.floor(s % 3600 / 60),
+      seconds: s % 60
+    };
+    keys.forEach(k => out[k].textContent = String(val[k]).padStart(2, '0'));
+  };
+  const id = setInterval(tick, 1000);
+  tick();
+}
+
+/* ================================================================
+   Scratch to reveal
+   ================================================================ */
+function initScratch(){
+  const cv = $('#scratchCanvas');
+  const hint = $('#scratchHint');
+  let ctx, dpr = 1, done = false, moves = 0, drawing = false, last = null;
+
+  function paint(){
+    const r = cv.getBoundingClientRect();
+    dpr = Math.min(devicePixelRatio || 1, 2);
+    cv.width = Math.round(r.width * dpr); cv.height = Math.round(r.height * dpr);
+    ctx = cv.getContext('2d', { willReadFrequently:true });
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    const w = r.width, h = r.height;
+
+    const g = ctx.createLinearGradient(0, 0, w, h);
+    g.addColorStop(0,   '#f0cfd0');
+    g.addColorStop(.42, '#e2adb1');
+    g.addColorStop(1,   '#cf8f96');
+    ctx.fillStyle = g; ctx.fillRect(0, 0, w, h);
+
+    /* a little foil shimmer so it reads as something to scratch */
+    for (let i = 0; i < 140; i++){
+      const x = ((i * 137) % 991) / 991 * w;
+      const y = ((i * 79)  % 787) / 787 * h;
+      ctx.fillStyle = i % 3 ? 'rgba(255,255,255,.30)' : 'rgba(216,164,65,.34)';
+      ctx.beginPath(); ctx.arc(x, y, .8 + (i % 5) * .4, 0, 6.284); ctx.fill();
+    }
+    ctx.strokeStyle = 'rgba(255,255,255,.28)'; ctx.lineWidth = 1;
+    for (let i = -h; i < w; i += 16){
+      ctx.beginPath(); ctx.moveTo(i, h); ctx.lineTo(i + h, 0); ctx.stroke();
+    }
+    ctx.globalCompositeOperation = 'destination-out';
+  }
+
+  function erase(x, y){
+    const R = 26;
+    if (last){
+      const dx = x - last.x, dy = y - last.y;
+      const steps = Math.max(1, Math.hypot(dx, dy) / 7);
+      for (let i = 0; i <= steps; i++){
+        ctx.beginPath();
+        ctx.arc(last.x + dx * i / steps, last.y + dy * i / steps, R, 0, 6.284);
+        ctx.fill();
+      }
+    }
+    ctx.beginPath(); ctx.arc(x, y, R, 0, 6.284); ctx.fill();
+    last = { x, y };
+  }
+
+  function cleared(){
+    const d = ctx.getImageData(0, 0, cv.width, cv.height).data;
+    let gone = 0, total = 0;
+    for (let i = 3; i < d.length; i += 4 * 24){ total++; if (d[i] < 32) gone++; }
+    return total ? gone / total : 0;
+  }
+
+  function finish(){
+    if (done) return;
+    done = true;
+    cv.classList.add('is-done');
+    hint.classList.add('is-hidden');
+    burstConfetti($('#scratchWrap'));
+  }
+
+  const pos = e => {
+    const r = cv.getBoundingClientRect();
+    return { x: e.clientX - r.left, y: e.clientY - r.top };
+  };
+  cv.addEventListener('pointerdown', e => {
+    if (done) return;
+    drawing = true; last = null;
+    cv.setPointerCapture?.(e.pointerId);
+    const p = pos(e); erase(p.x, p.y);
+  });
+  cv.addEventListener('pointermove', e => {
+    if (!drawing || done) return;
+    e.preventDefault();
+    const p = pos(e); erase(p.x, p.y);
+    if (++moves % 9 === 0 && cleared() > .48) finish();
+  });
+  const up = () => {
+    if (!drawing) return;
+    drawing = false; last = null;
+    if (!done && cleared() > .34) finish();
+  };
+  cv.addEventListener('pointerup', up);
+  cv.addEventListener('pointercancel', up);
+  cv.addEventListener('pointerleave', up);
+  /* keyboard / reduced-motion path: one press reveals it */
+  cv.tabIndex = 0;
+  cv.setAttribute('aria-label', t('scratchHint'));
+  cv.addEventListener('keydown', e => {
+    if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); finish(); }
+  });
+
+  paint();
+  addEventListener('resize', () => { if (!done) paint(); }, { passive:true });
+}
+
+/* ================================================================
+   Confetti
+   ================================================================ */
+function burstConfetti(anchor){
+  const cv = $('#confetti');
+  const { ctx, w, h } = fitCanvas(cv);
+  const r = anchor.getBoundingClientRect();
+  const ox = r.left + r.width / 2, oy = r.top + r.height / 2;
+  const colors = ['#d8a441','#6b211c','#e2adb1','#fdf7f3','#8a413a','#efcb86'];
+  const N = reduceMotion ? 40 : 130;
+
+  const bits = Array.from({ length: N }, (_, i) => {
+    const a = (i / N) * 6.284 + Math.random() * .5;
+    const sp = 3 + Math.random() * 8;
+    return {
+      x: ox + (Math.random() - .5) * r.width * .5,
+      y: oy + (Math.random() - .5) * r.height * .4,
+      vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 4,
+      s: 3 + Math.random() * 5, rot: Math.random() * 6.284,
+      vr: (Math.random() - .5) * .28,
+      c: colors[i % colors.length], heart: i % 5 === 0, life: 1
+    };
+  });
+
+  let raf;
+  (function step(){
+    ctx.clearRect(0, 0, w, h);
+    let alive = 0;
+    bits.forEach(b => {
+      if (b.life <= 0) return;
+      alive++;
+      b.vy += .19; b.vx *= .992;
+      b.x += b.vx; b.y += b.vy; b.rot += b.vr;
+      b.life -= .0072;
+      ctx.save();
+      ctx.globalAlpha = Math.max(0, Math.min(1, b.life * 1.5));
+      ctx.translate(b.x, b.y); ctx.rotate(b.rot);
+      ctx.fillStyle = b.c;
+      if (b.heart){
+        const k = b.s / 46;
+        ctx.scale(k, k); ctx.translate(-50, -43);
+        ctx.fill(new Path2D('M50,84 C22,64 4,45 4,27 C4,13 15,4 27,4 C37,4 45,10 50,18 C55,10 63,4 73,4 C85,4 96,13 96,27 C96,45 78,64 50,84 Z'));
+      } else {
+        ctx.fillRect(-b.s / 2, -b.s / 4, b.s, b.s / 2);
+      }
+      ctx.restore();
+    });
+    if (alive) raf = requestAnimationFrame(step);
+    else { ctx.clearRect(0, 0, w, h); cancelAnimationFrame(raf); }
+  })();
+}
+
+/* ================================================================
+   Music — your song if you gave one, otherwise a soft harp motif
+   ================================================================ */
+const Music = (() => {
+  let audio = null, actx = null, master = null, timer = null, playing = false;
+
+  function useFile(){
+    audio = new Audio(CONFIG.assets.song);
+    audio.loop = true; audio.preload = 'auto'; audio.volume = 0;
+    return audio;
+  }
+
+  function fade(target, ms){
+    if (!audio) return;
+    const from = audio.volume, t0 = performance.now();
+    (function s(){
+      const k = Math.min(1, (performance.now() - t0) / ms);
+      audio.volume = from + (target - from) * k;
+      if (k < 1) requestAnimationFrame(s);
+    })();
+  }
+
+  /* a gentle pentatonic harp figure, used until you paste a song in */
+  function startSynth(){
+    actx = actx || new (window.AudioContext || window.webkitAudioContext)();
+    if (!master){
+      master = actx.createGain();
+      master.gain.value = 0;
+      const lp = actx.createBiquadFilter();
+      lp.type = 'lowpass'; lp.frequency.value = 2600;
+      master.connect(lp); lp.connect(actx.destination);
+    }
+    master.gain.cancelScheduledValues(actx.currentTime);
+    master.gain.linearRampToValueAtTime(.16, actx.currentTime + 1.6);
+
+    /* soft drone underneath */
+    [130.81, 196.00].forEach((f, i) => {
+      const o = actx.createOscillator(), g = actx.createGain();
+      o.type = 'sine'; o.frequency.value = f;
+      g.gain.value = i ? .028 : .042;
+      o.connect(g); g.connect(master); o.start();
+    });
+
+    const scale = [261.63, 293.66, 329.63, 392.00, 440.00, 523.25, 587.33, 659.25];
+    let i = 0;
+    const pluck = () => {
+      const f = scale[[0,2,4,5,7,4,2,1,3,5,6,4][i % 12]] * (i % 24 < 12 ? 1 : .5);
+      const o = actx.createOscillator(), g = actx.createGain();
+      o.type = 'triangle'; o.frequency.value = f;
+      const now = actx.currentTime;
+      g.gain.setValueAtTime(0, now);
+      g.gain.linearRampToValueAtTime(.10, now + .012);
+      g.gain.exponentialRampToValueAtTime(.0008, now + 2.4);
+      o.connect(g); g.connect(master);
+      o.start(now); o.stop(now + 2.5);
+      i++;
+      timer = setTimeout(pluck, 620 + (i % 4 === 0 ? 380 : 0));
+    };
+    pluck();
+  }
+
+  return {
+    available(){ return true; },
+    async play(){
+      if (playing) return;
+      playing = true;
+      if (CONFIG.assets.song){
+        (audio || useFile());
+        try { await audio.play(); fade(.55, 2200); }
+        catch { playing = false; throw new Error('blocked'); }
+      } else {
+        startSynth();
+      }
+    },
+    pause(){
+      playing = false;
+      if (audio) { fade(0, 500); setTimeout(() => audio && audio.pause(), 520); }
+      if (master) master.gain.linearRampToValueAtTime(0, actx.currentTime + .4);
+      clearTimeout(timer);
+    },
+    resume(){
+      playing = true;
+      if (audio) { audio.play(); fade(.55, 900); }
+      else if (master) master.gain.linearRampToValueAtTime(.16, actx.currentTime + .8);
+      else startSynth();
+    },
+    get playing(){ return playing; }
+  };
+})();
+
+/* ================================================================
+   RSVP
+   ================================================================ */
+const GFORM_ACTION = id => `https://docs.google.com/forms/d/e/${id}/formResponse`;
+
+/* Is the Google Form wired up enough to try? */
+function gformReady(){
+  const g = CONFIG.rsvp?.googleForm;
+  return !!(g && g.formId && g.entries && g.entries.name && g.entries.attending);
+}
+
+/* Google's answers, keyed the way Google wants them. */
+function gformBody(d){
+  const g = CONFIG.rsvp.googleForm, p = new URLSearchParams();
+  const put = (id, val) => { if (id && val !== '' && val != null) p.append(`entry.${String(id).replace(/\D/g,'')}`, val); };
+  put(g.entries.name,      d.name);
+  put(g.entries.email,     d.email);
+  put(g.entries.guests,    d.guests);
+  put(g.entries.attending, d.attending === 'yes' ? g.attendingYes : g.attendingNo);
+  put(g.entries.message,   d.message);
+  /* Google's own email field, only when the form collects it */
+  if (g.collectsEmail && d.email) p.append('emailAddress', d.email);
+  /* keeps single-page forms happy */
+  p.append('fvv', '1'); p.append('pageHistory', '0'); p.append('submit', 'Submit');
+  return p;
+}
+
+/* Plan A: a quiet cross-origin POST. Google sends no CORS headers,
+   so the reply is opaque — a resolved promise means "delivered",
+   not "accepted". That is as good as it gets without a backend. */
+async function gformFetch(d){
+  await fetch(GFORM_ACTION(CONFIG.rsvp.googleForm.formId), {
+    method: 'POST',
+    mode: 'no-cors',
+    body: gformBody(d)          // urlencoded → a CORS-safelisted request
+  });
+}
+
+/* Plan B: an old-fashioned form POST into a hidden iframe.
+   Survives environments where fetch is walled off. */
+function gformIframe(d){
+  return new Promise((resolve, reject) => {
+    let sink = document.getElementById('gformSink');
+    if (!sink){
+      sink = el('iframe');
+      sink.id = 'gformSink'; sink.name = 'gformSink';
+      sink.style.cssText = 'position:absolute;width:0;height:0;border:0;left:-9999px';
+      document.body.appendChild(sink);
+    }
+    const f = el('form');
+    f.action = GFORM_ACTION(CONFIG.rsvp.googleForm.formId);
+    f.method = 'POST'; f.target = 'gformSink';
+    f.style.display = 'none';
+    for (const [k, val] of gformBody(d)){
+      const i = el('input'); i.type = 'hidden'; i.name = k; i.value = val;
+      f.appendChild(i);
+    }
+    document.body.appendChild(f);
+    const done = setTimeout(() => { f.remove(); resolve(); }, 1400);
+    sink.addEventListener('load', () => { clearTimeout(done); f.remove(); resolve(); }, { once:true });
+    try { f.submit(); } catch (err){ clearTimeout(done); f.remove(); reject(err); }
+  });
+}
+
+/* Last resort: hand the guest a prefilled WhatsApp / mail draft. */
+function handoffUrl(d){
+  const lines = [
+    `RSVP — ${v(CONFIG.couple.a.name)} & ${v(CONFIG.couple.b.name)}`,
+    `${t('fName')}: ${d.name}`,
+    `${t('fEmail')}: ${d.email}`,
+    d.guests  ? `${t('fGuests')}: ${d.guests}`   : null,
+    `${t('fAttend')} ${d.attending === 'yes' ? t('fYes') : t('fNo')}`,
+    d.message ? `${t('fMessage')}: ${d.message}` : null
+  ].filter(Boolean).join('\n');
+
+  const wa = CONFIG.rsvp?.whatsApp;
+  return wa
+    ? `https://wa.me/${wa.replace(/\D/g,'')}?text=${encodeURIComponent(lines)}`
+    : `mailto:${CONFIG.rsvp?.email || ''}?subject=${encodeURIComponent('RSVP — ' + d.name)}`
+      + `&body=${encodeURIComponent(lines)}`;
+}
+
+function initRsvp(){
+  const form   = $('#rsvpForm'),
+        note   = $('#formNote'),
+        thanks = $('#thanks'),
+        btn    = form.querySelector('.submit');
+
+  if (CONFIG.rsvp?.googleForm?.formId && !gformReady()){
+    console.warn('[RSVP] formId is set but entries.name / entries.attending are empty — ' +
+                 'falling back to WhatsApp/email. See CONFIG section 7, step 3.');
+  }
+
+  const succeed = attending => {
+    form.classList.add('is-off');
+    thanks.classList.add('is-on');
+    if (attending === 'yes') burstConfetti(thanks);
+  };
+
+  form.addEventListener('submit', async e => {
+    e.preventDefault();
+    const f = new FormData(form);
+    const d = {
+      name:      (f.get('name')    || '').toString().trim(),
+      email:     (f.get('email')   || '').toString().trim(),
+      guests:    (f.get('guests')  || '').toString().trim(),
+      attending: (f.get('attending')|| '').toString(),
+      message:   (f.get('message') || '').toString().trim()
+    };
+
+    if (!d.name || !d.email || !d.attending){
+      note.textContent = t('formErr');
+      note.style.color = 'var(--oxblood)';
+      return;
+    }
+
+    /* no Google Form configured → straight to the handoff */
+    if (!gformReady()){
+      window.open(handoffUrl(d), '_blank', 'noopener');
+      succeed(d.attending);
+      return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = t('fSending');
+    note.textContent = '';
+
+    try {
+      try { await gformFetch(d); }
+      catch { await gformIframe(d); }
+      succeed(d.attending);
+    } catch (err){
+      console.error('[RSVP] Google Form submit failed:', err);
+      note.textContent = t('formFail');
+      note.style.color = 'var(--oxblood)';
+      window.open(handoffUrl(d), '_blank', 'noopener');
+      succeed(d.attending);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = t('fSend');
+    }
+  });
+}
+
+/* ================================================================
+   Reveal on scroll
+   ================================================================ */
+let io;
+function observeReveals(root = document){
+  if (reduceMotion){ $$('.reveal', root).forEach(n => n.classList.add('in')); return; }
+  io = io || new IntersectionObserver(entries => {
+    entries.forEach(en => {
+      if (en.isIntersecting){ en.target.classList.add('in'); io.unobserve(en.target); }
+    });
+  }, { rootMargin:'0px 0px -12% 0px', threshold:.15 });
+  $$('.reveal', root).forEach(n => io.observe(n));
+}
+
+/* ================================================================
+   Language
+   ================================================================ */
+function applyLang(next){
+  LANG = next;
+  document.documentElement.lang = next;
+  $$('[data-i18n]').forEach(n => n.textContent = t(n.dataset.i18n));
+  $$('[data-i18n-ph]').forEach(n => n.placeholder = t(n.dataset.i18nPh));
+  $('#langLabel').textContent = t('langOther');
+  renderStatic();
+  renderTimeline();
+  renderVenues();
+  renderPreEvents();
+  observeReveals();
+}
+
+/* ================================================================
+   Boot
+   ================================================================ */
+function boot(){
+  paintIcons(); paintRules();
+
+  /* gate + bow art */
+  $('#gateL').innerHTML = gateSvg('l');
+  $('#gateR').innerHTML = gateSvg('r');
+  $('#gateBow').innerHTML = bowSvg();
+  $('#nicheFrame').innerHTML = nicheSvg();
+  $('#heroFrame').innerHTML = heroFrameSvg();
+
+  /* What goes in the niche: your image wins, then the drawn
+     idol, then the ॐ glyph.                                */
+  const niche = $('.niche'), art = $('#nicheArt'), idol = $('#nicheIdol');
+  if (CONFIG.assets.ganesha){
+    niche.classList.add('has-art');
+    art.classList.remove('is-glyph');
+    art.style.backgroundImage = `url("${CONFIG.assets.ganesha}")`;
+  } else if (CONFIG.ganeshaStyle === 'om'){
+    niche.classList.add('has-art');
+    art.innerHTML = '<span class="om" aria-hidden="true">ॐ</span>';
+  } else {
+    niche.classList.add('has-idol');
+    idol.innerHTML = ganeshaSvg();
+  }
+
+  /* your files, or drawn stand-ins */
+  const A = CONFIG.assets;
+  if (A.cover){ const n = $('#coverPhoto'); n.hidden = false; n.style.backgroundImage = `url("${A.cover}")`; $('#coverArt').hidden = true; }
+  else drawCoverArt();
+
+  if (A.hero){ const n = $('#heroPhoto'); n.hidden = false; n.style.backgroundImage = `url("${A.hero}")`; $('#heroArt').hidden = true; }
+  else drawHeroArt();
+
+  const img = $('#photoMain');
+  img.src = A.photo || placeholderPhoto(900, 675, 'YOUR PHOTO HERE');
+  img.alt = `${v(CONFIG.couple.a.name)} & ${v(CONFIG.couple.b.name)}`;
+
+  applyLang(LANG);
+  startCountdown();
+  initScratch();
+  initRsvp();
+
+  /* keep the page still behind the closed gate */
+  document.body.classList.add('is-locked');
+
+  /* --- open the gate ------------------------------------- */
+  const cover = $('#cover'), musicBtn = $('#musicBtn'), langBtn = $('#langBtn');
+  let opened = false;
+  const open = async () => {
+    if (opened) return;
+    opened = true;
+    cover.classList.add('is-open');
+    try { await Music.play(); musicBtn.classList.remove('is-muted'); }
+    catch { musicBtn.classList.add('is-muted'); }
+    setTimeout(() => {
+      document.body.classList.remove('is-locked');
+      musicBtn.classList.remove('is-hidden');
+      langBtn.classList.remove('is-hidden');
+      observeReveals();
+      cover.remove();
+    }, 1900);
+  };
+  $('#openBtn').addEventListener('click', open);
+  cover.addEventListener('click', open);
+
+  musicBtn.addEventListener('click', () => {
+    if (Music.playing){ Music.pause(); musicBtn.classList.add('is-muted'); }
+    else { Music.resume(); musicBtn.classList.remove('is-muted'); }
+  });
+  langBtn.addEventListener('click', () => applyLang(LANG === 'en' ? 'hi' : 'en'));
+
+  /* redraw canvas art on resize / orientation change */
+  let rt;
+  addEventListener('resize', () => {
+    clearTimeout(rt);
+    rt = setTimeout(() => {
+      if (!CONFIG.assets.cover && document.getElementById('coverArt')) drawCoverArt();
+      if (!CONFIG.assets.hero) drawHeroArt();
+      $$('.mini-map').forEach(cv => drawMiniMap(cv, +cv.dataset.seed));
+    }, 220);
+  }, { passive:true });
+}
+
+document.fonts?.ready.then(boot) ?? boot();
+</script>
