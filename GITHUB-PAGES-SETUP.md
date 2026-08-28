@@ -1,85 +1,103 @@
 # Hosting the Wedding Invitation on GitHub Pages
 
-Publish `wedding-invitation.html` at a custom domain. Total cost: ~$10–15/yr for the
-domain; hosting and HTTPS are free.
+Publish `wedding-invitation.html` as a live web page. Hosting and HTTPS are free.
 
-**Time:** ~15 minutes of work, plus up to a few hours of waiting for DNS and the TLS
-certificate.
-
----
-
-## Prerequisites
-
-- A GitHub account.
-- `git` and the GitHub CLI (`gh`). Check with:
-  ```bash
-  git --version && gh auth status
-  ```
-  If `gh` isn't installed: `brew install gh`, then `gh auth login`.
+The plan is in two parts. **Part 1** gets the site live at a free `github.io` URL — that's
+all that's needed for now. **Part 2** puts it behind a custom domain later, without
+disturbing anything set up in Part 1.
 
 ---
 
-## Step 1 — Buy a domain
+## Status
 
-Any registrar works. Good options:
+Already done locally:
 
-| Registrar | Notes |
-|---|---|
-| Cloudflare Registrar | Sold at wholesale cost, no renewal markup. Requires moving DNS to Cloudflare. |
-| Porkbun | Cheap, clean UI, free WHOIS privacy. |
-| Namecheap | Widely used; watch for higher renewal pricing than year one. |
+- [x] Git repo initialized in this directory
+- [x] `index.html` created as a copy of `wedding-invitation.html` (Pages serves
+      `index.html` as the site root)
+- [x] `.gitignore` added, excluding the unrelated diet-plan files and the working copy
+- [x] First commit made, authored as `satyamvats5@gmail.com`
+      (configured **repo-local only**, in `.git/config` — global git config untouched)
 
-Notes:
-- `.com` is the cheapest and most trusted. Novelty TLDs (`.wedding`, `.love`) often cost
-  3–5× more and can renew even higher.
-- Enable WHOIS privacy (usually free) so your name and address aren't in a public registry.
-- Set auto-renew on, or the site goes dark a year from now.
+Remaining, and needs you:
 
-You can skip this step entirely and stop after Step 3 — the free
-`https://<username>.github.io/<repo>/` URL works fine on its own.
+- [ ] `gh auth login` — requires a browser, so it can't be automated from here
+- [ ] Create the GitHub repo and push
+- [ ] Turn on Pages in repo settings
 
 ---
 
-## Step 2 — Create the repository
+# Part 1 — Get it live (do this now)
 
-GitHub Pages serves `index.html` as the root of the site, so the invitation gets copied
-to that name.
+## Step 1 — Authenticate the GitHub CLI
+
+Run in your terminal:
+
+```bash
+gh auth login
+```
+
+Choose `GitHub.com` → `HTTPS` → authenticate in the browser. Verify with:
+
+```bash
+gh auth status
+```
+
+Make sure it logs in as the account tied to `satyamvats5@gmail.com`. If `gh` isn't
+installed: `brew install gh`.
+
+## Step 2 — Create the repo and push
 
 ```bash
 cd /Users/satkumar/Downloads/Helms/SplitTest/5Aug
-
-git init
-cp wedding-invitation.html index.html
-git add index.html
-git commit -m "Wedding invitation"
-```
-
-Then create the remote and push:
-
-```bash
 gh repo create wedding --public --source=. --push
 ```
 
-Replace `wedding` with whatever repo name you want — it appears in the free
-`github.io` URL, but not in the custom domain URL.
+`wedding` becomes part of the free URL, so pick a name you don't mind being visible.
 
-### Two things to know about the repo
+### On repo visibility
 
-- **It must be public.** GitHub Pages on private repos requires a paid plan. The repo is
-  the site's source, so treat everything in it as published.
-- **Nothing sensitive on the page.** Since it's world-readable, keep home addresses,
-  phone numbers, and guest lists off it. Anyone who guesses or is forwarded the URL can
-  read it, and search engines may index it. To discourage indexing, add this inside
-  `<head>` of `index.html`:
+The repo has to be **public** on a free GitHub account — Pages from a private repo
+requires a paid plan (Pro, Team, or Enterprise).
+
+More importantly: **the published site is public either way.** Repo visibility only
+controls whether the source and commit history are browsable. Even on a paid plan with a
+private repo, the rendered page is served to anyone who requests the URL; genuinely
+access-controlled Pages sites are an Enterprise Cloud feature.
+
+So the site is *unlisted, not private* — fine for an invitation, since only the people you
+send the link to will know it exists. Two things follow:
+
+- Don't put anything on the page you'd mind a stranger reading. Currently it's clean: the
+  RSVP emails are `example.com` placeholders, and the only real identifiers are Google
+  Form field IDs, which exist to receive submissions.
+- To keep it out of search results, add this inside `<head>`:
   ```html
   <meta name="robots" content="noindex, nofollow">
   ```
-  This is a request, not enforcement — it is not a substitute for leaving private
-  details off the page.
+  It's a request to crawlers, not enforcement — no substitute for leaving private details
+  off the page.
 
-### Keeping edits in sync
+## Step 3 — Enable Pages
 
-`index.html` is now a *copy*. When you change `wedding-invitation.html`, re-copy and push:
+1. Open `https://github.com/<username>/wedding/settings/pages`
+2. **Build and deployment → Source**: `Deploy from a branch`
+3. Branch `main`, folder `/ (root)`
+4. **Save**
+
+Live within a minute or two at:
+
+```
+https://<username>.github.io/wedding/
+```
+
+Open it and confirm it renders. Part 1 is done — this URL is shareable as-is, and it's
+served over HTTPS.
+
+## Editing the page after it's live
+
+`index.html` is a *copy*, so editing `wedding-invitation.html` alone won't change the
+site. After each edit:
 
 ```bash
 cp wedding-invitation.html index.html
@@ -88,98 +106,92 @@ git commit -m "Update invitation"
 git push
 ```
 
-Alternatively, drop the copy and rename the original to `index.html` so there's only one
-file to edit.
+Pages redeploys automatically, usually in under a minute. (`wedding-invitation.html` is
+gitignored so it doesn't clutter `git status` — `index.html` is the published file.)
+
+If juggling two files gets annoying, just rename the original to `index.html` and edit
+that directly.
 
 ---
 
-## Step 3 — Enable GitHub Pages
+# Part 2 — Custom domain (later)
 
-1. Go to `https://github.com/<username>/wedding/settings/pages`
-2. Under **Build and deployment → Source**, choose **Deploy from a branch**
-3. Branch: `main`, folder: `/ (root)`
-4. **Save**
+Nothing here is required for the site to work. Everything from Part 1 keeps running, and
+the `github.io` URL continues to work after you add a domain.
 
-Within a minute or two the site is live at:
+## Step 4 — Buy a domain
 
-```
-https://<username>.github.io/wedding/
-```
+| Registrar | Notes |
+|---|---|
+| Cloudflare Registrar | Wholesale cost, no renewal markup. Requires using Cloudflare DNS. |
+| Porkbun | Cheap, clean UI, free WHOIS privacy. |
+| Namecheap | Widely used; check renewal price, often above year one. |
 
-Load it in a browser and confirm it renders before moving on. If you get a 404, check
-that the file is named exactly `index.html` at the repo root and that the push landed
-(`git log origin/main -1`).
+Roughly $10–15/yr for a `.com`. Novelty TLDs (`.wedding`, `.love`) run 3–5× that and can
+renew higher still. Turn on WHOIS privacy and auto-renew.
 
----
+## Step 5 — Tell GitHub the domain
 
-## Step 4 — Point the domain at Pages
-
-### 4a. Tell GitHub about the domain
-
-In **Settings → Pages → Custom domain**, enter your domain (e.g. `example.com`) and save.
-This commits a file named `CNAME` to the repo containing that one line. You can also
-create the file by hand:
+**Settings → Pages → Custom domain**, enter the domain, save. This commits a `CNAME` file
+containing that one line. Equivalent by hand:
 
 ```bash
 echo "example.com" > CNAME
 git add CNAME && git commit -m "Add custom domain" && git push
 ```
 
-Keep the file — deleting it un-sets the custom domain.
+Keep the file — deleting it un-sets the domain and the custom URL breaks.
 
-### 4b. Add DNS records at your registrar
+## Step 6 — DNS records
 
-For an apex domain (`example.com`), create four `A` records plus a `www` alias:
+For an apex domain (`example.com`):
 
-| Type  | Name / Host | Value             |
-|-------|-------------|-------------------|
-| A     | `@`         | `185.199.108.153` |
-| A     | `@`         | `185.199.109.153` |
-| A     | `@`         | `185.199.110.153` |
-| A     | `@`         | `185.199.111.153` |
+| Type  | Name / Host | Value                  |
+|-------|-------------|------------------------|
+| A     | `@`         | `185.199.108.153`      |
+| A     | `@`         | `185.199.109.153`      |
+| A     | `@`         | `185.199.110.153`      |
+| A     | `@`         | `185.199.111.153`      |
 | CNAME | `www`       | `<username>.github.io` |
 
-The four A records are GitHub's load-balanced IPs — add all of them. Some registrars
-write the apex as blank or as the domain itself instead of `@`.
+Add all four A records — they're GitHub's load-balanced IPs. Some registrars express the
+apex as a blank host or the full domain rather than `@`.
 
-If you'd rather use `www.example.com` as the primary address, the single `CNAME` record
-is enough and you can skip the A records.
+To use `www.example.com` as the primary address instead, the single `CNAME` suffices and
+the A records can be skipped.
 
-**Using Cloudflare DNS?** Set these records to **DNS only** (grey cloud, not orange).
-Cloudflare's proxy interferes with GitHub's certificate issuance.
+**On Cloudflare DNS:** set these to **DNS only** (grey cloud, not orange). The proxy
+interferes with GitHub's certificate issuance.
 
-### 4c. Verify and enforce HTTPS
-
-Check that DNS has propagated:
+## Step 7 — Verify and enforce HTTPS
 
 ```bash
-dig +short example.com
-dig +short www.example.com
+dig +short example.com          # expect the four 185.199.x.153 addresses
+dig +short www.example.com      # expect a chain to <username>.github.io
 ```
 
-The first should return the four `185.199.x.153` addresses; the second should chain to
-`<username>.github.io`.
+Once those resolve, go back to **Settings → Pages** and tick **Enforce HTTPS**. The
+checkbox stays greyed out until GitHub issues the Let's Encrypt certificate — usually
+minutes after DNS propagates, occasionally up to 24 hours. Don't skip it, or the site is
+served over plain HTTP.
 
-Then return to **Settings → Pages** and tick **Enforce HTTPS**. The checkbox stays
-greyed out until GitHub finishes issuing the Let's Encrypt certificate — usually a few
-minutes after DNS resolves, occasionally up to 24 hours. Don't skip this; without it
-the site is served over plain HTTP.
-
-Optionally, claim the domain under **Settings → Pages → verified domains** to prevent
-anyone else from pointing the same domain at their own Pages site.
+Optionally claim the domain under **Settings → Pages → verified domains** so nobody else
+can point it at their own Pages site.
 
 ---
 
 ## Notes on this specific page
 
-`wedding-invitation.html` is a single self-contained file. Its only external references are:
+`wedding-invitation.html` is one self-contained file. Its only external references:
 
-- **Google Fonts** (`fonts.googleapis.com`, `fonts.gstatic.com`) — loads normally over
-  HTTPS on a live site.
-- **Google Maps** embeds and search links — likewise fine.
+- **Google Fonts** (`fonts.googleapis.com`, `fonts.gstatic.com`) — load normally over HTTPS
+- **Google Maps** embeds and search links — likewise fine
 
-There are no local images, CSS, or JS files to move, so nothing else needs to be added
-to the repo.
+No local images, CSS, or JS to move, so `index.html` is the entire site.
+
+One thing to test on the live URL: the RSVP form submits to Google Forms, which is blocked
+in some preview environments but should work from real hosting. Send a test RSVP once the
+site is up and confirm it lands in the linked form's responses.
 
 ---
 
@@ -187,9 +199,10 @@ to the repo.
 
 | Symptom | Cause and fix |
 |---|---|
-| 404 at the `github.io` URL | File isn't named `index.html`, isn't at the repo root, or the push didn't land. Check the Actions tab for the Pages build. |
-| Custom domain shows "improperly configured" | DNS hasn't propagated yet, or the A records are wrong. Wait, then re-check with `dig`. |
-| Certificate error / HTTPS unavailable | DNS not yet resolving to GitHub, or Cloudflare proxying is on. Fix DNS, then wait for the cert. |
-| Domain worked, then broke after an edit | The `CNAME` file was deleted. Re-add it. |
-| Changes not showing | Browser cache — hard-reload. Or you edited `wedding-invitation.html` without re-copying to `index.html`. |
+| 404 at the `github.io` URL | File not named exactly `index.html`, not at repo root, or the push didn't land. Check the Actions tab for the Pages build. |
+| Changes not showing | Edited `wedding-invitation.html` without re-copying to `index.html`. Or browser cache — hard-reload. |
 | Old version stuck for hours | Check the Actions tab; a failed Pages build leaves the previous version live. |
+| Custom domain "improperly configured" | DNS not propagated, or wrong A records. Wait, re-check with `dig`. |
+| Certificate error / HTTPS unavailable | DNS not yet pointing at GitHub, or Cloudflare proxying is on. Fix, then wait for the cert. |
+| Domain worked, then broke | The `CNAME` file was deleted by a push. Re-add it. |
+| `gh` push rejected | Authenticated as the wrong account. `gh auth status`, then `gh auth switch`. |
