@@ -1,7 +1,25 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
 <title>Moonlit Vows</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
 <meta name="googlebot" content="noindex, nofollow">
+
+<!-- Link preview (WhatsApp, iMessage, Signal, …).
+     Deliberately says nothing: no names, no date, no venue — so the
+     card gives away no more than the bare URL did, and needs no
+     update when the real details go in.
+
+     No og:image on purpose — a preview image would have to be a real
+     file at an absolute URL, which means committing the couple's
+     names or photo as a public, permanently-cached asset.
+
+     No og:url either: leaving it out lets the sharer's actual URL
+     stand, so this survives a later move to a custom domain. -->
+<meta property="og:type"        content="website">
+<meta property="og:title"       content="💌 You're Invited">
+<meta property="og:description" content="Tap to open the invitation ✨">
+<meta name="twitter:card"       content="summary">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Parisienne&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Tiro+Devanagari+Sanskrit:ital@0;1&family=Tiro+Bangla:ital@0;1&display=swap">
 
@@ -1203,7 +1221,9 @@ const STRINGS = {
     fSend:"Send Message", fSending:"Sending…",
     thanksTitle:"Thank you!", thanksBody:"Your response is on its way to us.",
     formErr:"Please fill in your name, email and whether you'll be joining us.",
-    formFail:"That didn't go through. Opening WhatsApp so you can send it directly.",
+    formFail:"That didn't go through — your reply hasn't reached us yet.",
+    formFailWa:"Please send it to us on WhatsApp at",
+    formFailEmail:"Please email it to us at",
     closingLine:"We can't wait to celebrate with you!",
     langOther:"हिन्दी"
   },
@@ -1230,7 +1250,9 @@ const STRINGS = {
     fSend:"संदेश भेजें", fSending:"भेजा जा रहा है…",
     thanksTitle:"धन्यवाद!", thanksBody:"आपका उत्तर हमारे पास पहुँच रहा है।",
     formErr:"कृपया अपना नाम, ईमेल और उपस्थिति की जानकारी भरें।",
-    formFail:"संदेश नहीं जा सका। सीधे भेजने के लिए व्हाट्सएप खोल रहे हैं।",
+    formFail:"संदेश नहीं जा सका — आपका उत्तर अभी हम तक नहीं पहुँचा है।",
+    formFailWa:"कृपया इसे व्हाट्सएप पर हमें भेजें:",
+    formFailEmail:"कृपया इसे हमें ईमेल करें:",
     closingLine:"हम आपके साथ जश्न मनाने के लिए उत्सुक हैं!",
     langOther:"বাংলা"
   },
@@ -1258,7 +1280,9 @@ const STRINGS = {
     fSend:"বার্তা পাঠান", fSending:"পাঠানো হচ্ছে…",
     thanksTitle:"ধন্যবাদ!", thanksBody:"আপনার উত্তর আমাদের কাছে পৌঁছচ্ছে।",
     formErr:"অনুগ্রহ করে আপনার নাম, ইমেল এবং উপস্থিতির তথ্য পূরণ করুন।",
-    formFail:"বার্তাটি পাঠানো যায়নি। সরাসরি পাঠাতে হোয়াটসঅ্যাপ খোলা হচ্ছে।",
+    formFail:"বার্তাটি পাঠানো যায়নি — আপনার উত্তর এখনও আমাদের কাছে পৌঁছায়নি।",
+    formFailWa:"অনুগ্রহ করে হোয়াটসঅ্যাপে আমাদের পাঠান:",
+    formFailEmail:"অনুগ্রহ করে আমাদের ইমেল করুন:",
     closingLine:"আপনার সঙ্গে উৎসব করার অপেক্ষায় আছি!",
     langOther:"English"
   }
@@ -2321,22 +2345,27 @@ function gformIframe(d){
   });
 }
 
-/* Last resort: hand the guest a prefilled WhatsApp / mail draft. */
-function handoffUrl(d){
-  const lines = [
-    `RSVP — ${v(CONFIG.couple.a.name)} & ${v(CONFIG.couple.b.name)}`,
-    `${t('fName')}: ${d.name}`,
-    `${t('fEmail')}: ${d.email}`,
-    d.guests  ? `${t('fGuests')}: ${d.guests}`   : null,
-    `${t('fAttend')} ${d.attending === 'yes' ? t('fYes') : t('fNo')}`,
-    d.message ? `${t('fMessage')}: ${d.message}` : null
-  ].filter(Boolean).join('\n');
+/* Last resort: the submit never reached Google, so tell the guest
+   where to send it by hand.
 
-  const wa = CONFIG.rsvp?.whatsApp;
-  return wa
-    ? `https://wa.me/${wa.replace(/\D/g,'')}?text=${encodeURIComponent(lines)}`
-    : `mailto:${CONFIG.rsvp?.email || ''}?subject=${encodeURIComponent('RSVP — ' + d.name)}`
-      + `&body=${encodeURIComponent(lines)}`;
+   Deliberately plain text, not a wa.me / mailto: link. Two reasons:
+   the number and address then aren't sitting in the markup as
+   harvestable hrefs, and window.open() from here was unreliable
+   anyway — by the time an awaited fetch has failed the user gesture
+   has expired, so mobile popup blockers ate it.                   */
+function handoffText(){
+  const wa = (CONFIG.rsvp?.whatsApp || '').replace(/\D/g, '');
+  if (wa) return `${t('formFailWa')} ${prettyPhone(wa)}`;
+  const em = CONFIG.rsvp?.email || '';
+  if (em) return `${t('formFailEmail')} ${em}`;
+  return '';
+}
+
+/* 919748609947 → +91 97486 09947. Any shape we don't recognise is
+   shown as-is with a leading +, rather than mangled.              */
+function prettyPhone(digits){
+  const m = /^(\d{2})(\d{5})(\d{5})$/.exec(digits);
+  return m ? `+${m[1]} ${m[2]} ${m[3]}` : `+${digits}`;
 }
 
 function initRsvp(){
@@ -2373,10 +2402,13 @@ function initRsvp(){
       return;
     }
 
-    /* no Google Form configured → straight to the handoff */
+    /* no Google Form configured → nothing can be recorded, so point
+       the guest at WhatsApp and leave the form up. Deliberately not
+       succeed(): "thank you" would be a lie, and it hides the form
+       (and this note with it, since #formNote lives inside it).    */
     if (!gformReady()){
-      window.open(handoffUrl(d), '_blank', 'noopener');
-      succeed(d.attending);
+      note.textContent = `${t('formFail')} ${handoffText()}`.trim();
+      note.style.color = 'var(--oxblood)';
       return;
     }
 
@@ -2390,10 +2422,11 @@ function initRsvp(){
       succeed(d.attending);
     } catch (err){
       console.error('[RSVP] Google Form submit failed:', err);
-      note.textContent = t('formFail');
+      note.textContent = `${t('formFail')} ${handoffText()}`.trim();
       note.style.color = 'var(--oxblood)';
-      window.open(handoffUrl(d), '_blank', 'noopener');
-      succeed(d.attending);
+      /* No succeed() here on purpose. The reply did NOT reach us, so
+         the form stays on screen with what the guest typed intact,
+         ready to retry — and the note above stays visible.          */
     } finally {
       btn.disabled = false;
       btn.textContent = t('fSend');
