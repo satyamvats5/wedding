@@ -25,16 +25,37 @@ disturbing anything set up in Part 1.
       bytes are identical to local `index.html`
 - [x] `https_enforced` is `true`
 
+### Content and behaviour
+
 - [x] **RSVP form tested from the live URL** — submissions reach the Google Form correctly
 - [x] **`noindex` added** — `robots` and `googlebot` meta tags set to `noindex, nofollow`,
       so search engines are asked not to list the page
+- [x] **RSVP fallback contacts are real** — `whatsApp: "919748609947"` (India's `91`
+      prefix is required; the code strips non-digits, so bare 10 digits would build a
+      broken `wa.me` link) and `email: "satyamkumar13254@gmail.com"`. WhatsApp takes
+      priority whenever the number is non-empty. This path fires when a Google Form
+      submit *throws* — offline guest, flaky mobile data, ad-blocker — so before this fix
+      those RSVPs opened a draft to `rsvp@example.com` and vanished.
+- [x] **Language switcher is live on the cover**, not just after the doors open, so the
+      invocation's script can be changed before reading it. Music still waits for the
+      open, since audio needs a user gesture first.
+- [x] **Invocation stays in Devanagari in all languages** — deliberate. `invocation.en`
+      is intentionally identical to `invocation.hi`.
 
 Still open:
 
-- [ ] **Replace the `example.com` RSVP placeholder emails** with the real address.
-- [ ] **Consider adding `<!DOCTYPE html>` and `<meta charset="utf-8">`.** The file has
-      neither, so browsers render it in *quirks mode* and guess the text encoding. See
-      "Notes on this specific page" below.
+- [ ] **Add `<!DOCTYPE html>` and `<meta charset="utf-8">`.** The file has neither, so
+      browsers render it in *quirks mode* and guess the text encoding. This is the one
+      real outstanding risk — see "Notes on this specific page" below. Test the Devanagari
+      and Bangla text on a device that isn't yours before ruling it out.
+
+Not defects, don't "fix" these:
+
+- The three remaining `example.com` hits are `fEmailPh` — greyed-out hint text inside the
+  email input, in each language. `you@example.com` is correct there.
+- On the cover, toggling **en↔hi changes no verse text**, because English deliberately
+  keeps the Devanagari. Only the "tap to open" label and the button's own label change.
+  Switching to **Bangla does** change the verse. The switcher is working.
 
 Part 2 (custom domain) is deferred and entirely optional.
 
@@ -43,8 +64,6 @@ Part 2 (custom domain) is deferred and entirely optional.
 # Part 1 — Get it live  ✅ done
 
 Kept for reference / redoing from scratch.
-
-## Step 1 — Authenticate the GitHub CLI
 
 ## Step 1 — Authenticate the GitHub CLI
 
@@ -85,15 +104,20 @@ access-controlled Pages sites are an Enterprise Cloud feature.
 So the site is *unlisted, not private* — fine for an invitation, since only the people you
 send the link to will know it exists. Two things follow:
 
-- Don't put anything on the page you'd mind a stranger reading. Currently it's clean: the
-  RSVP emails are `example.com` placeholders, and the only real identifiers are Google
-  Form field IDs, which exist to receive submissions.
-- To keep it out of search results, add this inside `<head>`:
+- Don't put anything on the page you'd mind a stranger reading. **As of the RSVP fix, the
+  page does carry real contact details** — a WhatsApp number and a Gmail address, both in
+  the page source and in this public repo. That's a deliberate trade (guests need a
+  fallback that works), but it's a real, permanent exposure: scrapers harvest `wa.me`
+  links and `mailto:` addresses, and git history keeps them even if you later edit them
+  out. Expect some spam on both.
+- `noindex` is already in place — `robots` and `googlebot` meta tags:
   ```html
   <meta name="robots" content="noindex, nofollow">
+  <meta name="googlebot" content="noindex, nofollow">
   ```
-  It's a request to crawlers, not enforcement — no substitute for leaving private details
-  off the page.
+  It's a request to well-behaved crawlers, not enforcement. It does nothing about scrapers
+  that ignore it, and nothing about the repo itself being public — so it is no substitute
+  for leaving private details off the page.
 
 ## Step 3 — Enable Pages
 
