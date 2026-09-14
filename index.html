@@ -11,6 +11,7 @@
 <meta name="robots" content="noindex, nofollow">
 <meta name="googlebot" content="noindex, nofollow">
 
+
 <!-- Link preview (WhatsApp, iMessage, Signal, …).
      Deliberately says nothing: no names, no date, no venue — so the
      card gives away no more than the bare URL did, and needs no
@@ -869,9 +870,10 @@ button{ font:inherit; color:inherit; }
   margin-top:22px;
 }
 .closing .tag{
-  margin-top:16px; font-size:12.5px; letter-spacing:.22em;
-  text-transform:uppercase; color:var(--rose-ink); opacity:.75;
+  margin-top:16px; font-size:clamp(20px,5.6vw,26px); letter-spacing:.02em;
+  font-family:var(--f-name); text-transform:none; color:var(--rose-ink); opacity:.9;
 }
+.closing .tag b{ font-weight:700; color:var(--oxblood-soft); }
 
 /* ============================================================
    4 · FLOATING CONTROLS
@@ -1215,7 +1217,9 @@ const CONFIG = {
   couple: {
         a: { name: "Tania", parents: "Daughter of Rina & Late Bhaskar Nag" },
         b: { name: "Satyam", parents: "Son of Savita & Sanjay Singh" },
-        hashtag: "#TaniaWedsSatyam"
+        hashtag: "#SadaDasTan",
+        /* substrings inside `hashtag` to render bold, in order      */
+        hashtagEmphasis: ["Sa", "Tan"]
   },
 
   /* ---- 2. the date -------------------------------------- */
@@ -1264,7 +1268,7 @@ const CONFIG = {
   ],
   /* ---- 5. travel information ---------------------------- */
   transport: "From Netaji Subhash Chandra Bose International Airport, the venue is easily reached by cab or private car. Guests travelling by train may arrive at Barrackpore Railway Station and continue by cab or local transport. For those driving, the venue is on S.N. Banerjee Road, Chiriamore, Barrackpore, beside HP Petroleum. Valet parking is available at the entrance gate for your convenience.",
-  rsvpBy:    { en: "Kindly respond by 20 November 2026",
+  rsvpBy:    { en: "Kindly respond by 15 November 2026",
                hi: "कृपया 20 नवंबर 2026 तक उत्तर दें",
                bn: "অনুগ্রহ করে 20 নভেম্বর 2026-এর মধ্যে জানান" },
 
@@ -1353,7 +1357,7 @@ const CONFIG = {
     coverVideo: "assets/front_videp.mp4",  // the animated front-page opening
     hero:    "assets/firstpage.png",  // the first-page background behind the names
     photo:   "demo_Img.jpg",  // the couple photo (4:3 works best)
-    song:    "",  // "data:audio/mpeg;base64,…" or "audio/song.mp3"
+    song:    "assets/song.mp3",  // "data:audio/mpeg;base64,…" or "audio/song.mp3"
     /* Ganesha for the niche at the crown of the gate.
        Portrait-ish crops sit best — the niche is roughly 1:1.16
        and is anchored near the top, so the face lands well.
@@ -2106,6 +2110,16 @@ function drawMiniMap(cv, seed){
 /* ================================================================
    Content rendering
    ================================================================ */
+function highlightSubstrings(str, subs){
+  let out = str;
+  subs.forEach(sub => {
+    const i = out.indexOf(sub);
+    if (i === -1) return;
+    out = out.slice(0, i) + '<b>' + sub + '</b>' + out.slice(i + sub.length);
+  });
+  return out;
+}
+
 function renderStatic(){
   const c = CONFIG.couple;
   $('#nameA').textContent   = v(c.a.name);
@@ -2113,7 +2127,7 @@ function renderStatic(){
   $('#parentA').textContent = v(c.a.parents);
   $('#parentB').textContent = v(c.b.parents);
   $('#signature').textContent = `${v(c.a.name)} & ${v(c.b.name)}`;
-  $('#hashtag').textContent   = c.hashtag || '';
+  $('#hashtag').innerHTML = highlightSubstrings(c.hashtag || '', c.hashtagEmphasis || []);
 
   const loc  = LOCALES[LANG] || 'en-IN';
   const long = WEDDING.toLocaleDateString(loc, { day:'numeric', month:'long', year:'numeric' });
@@ -2461,10 +2475,11 @@ function burstConfetti(anchor){
 }
 
 /* ================================================================
-   Music — your song if you gave one, otherwise a soft harp motif
+   Music — your song if you gave one, otherwise an original
+   sitar-and-dholak arrangement
    ================================================================ */
 const Music = (() => {
-  let audio = null, actx = null, master = null, timer = null, playing = false;
+  let audio = null, actx = null, master = null, timer = null, playing = false, usingFile = false;
 
   function useFile(){
     audio = new Audio(CONFIG.assets.song);
@@ -2482,43 +2497,178 @@ const Music = (() => {
     })();
   }
 
-  /* a gentle pentatonic harp figure, used until you paste a song in */
+  let noiseBuf = null;
+  function getNoiseBuffer(){
+    if (!noiseBuf){
+      const len = actx.sampleRate * .3;
+      noiseBuf = actx.createBuffer(1, len, actx.sampleRate);
+      const d = noiseBuf.getChannelData(0);
+      for (let i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
+    }
+    return noiseBuf;
+  }
+
+  /* a plucked "sitar" voice: a fast slide into the note, light
+     vibrato, and a softly bandpassed tone — rounder than a raw
+     sawtooth, so it sits underneath the melody rather than buzzing */
+  function sitarNote(f, t, dur){
+    const o = actx.createOscillator(), g = actx.createGain();
+    o.type = 'triangle';
+    o.frequency.setValueAtTime(f * 1.03, t);
+    o.frequency.exponentialRampToValueAtTime(f, t + .09);
+    const lfo = actx.createOscillator(), lfoGain = actx.createGain();
+    lfo.type = 'sine'; lfo.frequency.value = 5; lfoGain.gain.value = f * .004;
+    lfo.connect(lfoGain); lfoGain.connect(o.frequency);
+    const bp = actx.createBiquadFilter();
+    bp.type = 'bandpass'; bp.frequency.value = f * 2; bp.Q.value = 1.6;
+    g.gain.setValueAtTime(0, t);
+    g.gain.linearRampToValueAtTime(.16, t + .02);
+    g.gain.exponentialRampToValueAtTime(.0006, t + dur);
+    o.connect(bp); bp.connect(g); g.connect(master);
+    o.start(t); lfo.start(t);
+    o.stop(t + dur + .12); lfo.stop(t + dur + .12);
+  }
+
+  /* two hand-drum voices for a light dholak-style pulse — kept soft
+     and low in the mix so it supports the melody, not overpowering */
+  function tablaHit(t, low){
+    const noise = actx.createBufferSource();
+    noise.buffer = getNoiseBuffer();
+    const bp = actx.createBiquadFilter();
+    bp.type = low ? 'lowpass' : 'bandpass';
+    bp.frequency.value = low ? 220 : 1600;
+    if (!low) bp.Q.value = 2.2;
+    const g = actx.createGain();
+    g.gain.setValueAtTime(low ? .2 : .08, t);
+    g.gain.exponentialRampToValueAtTime(.0006, t + (low ? .24 : .1));
+    noise.connect(bp); bp.connect(g); g.connect(master);
+    noise.start(t); noise.stop(t + .3);
+    if (low){
+      const o = actx.createOscillator(), og = actx.createGain();
+      o.type = 'sine';
+      o.frequency.setValueAtTime(100, t);
+      o.frequency.exponentialRampToValueAtTime(52, t + .2);
+      og.gain.setValueAtTime(.16, t);
+      og.gain.exponentialRampToValueAtTime(.0006, t + .24);
+      o.connect(og); og.connect(master);
+      o.start(t); o.stop(t + .26);
+    }
+  }
+
+  /* an original ~36s arrangement — pad chords, a tanpura-style
+     drone, a dholak pulse and a sitar melody, scheduled ahead
+     and looped                                                   */
+  function scheduleLoop(startTime){
+    const LOOP = 36;
+    const chords = [
+      [146.83,185.00,220.00], [110.00,138.59,164.81],
+      [123.47,146.83,185.00], [98.00,123.47,146.83],
+      [146.83,185.00,220.00], [110.00,138.59,164.81],
+      [98.00,123.47,146.83],  [110.00,138.59,164.81]
+    ];
+    const CHORD_LEN = LOOP / chords.length;
+    chords.forEach((tones, i) => {
+      const t0 = startTime + i * CHORD_LEN;
+      tones.forEach((f, j) => {
+        const o = actx.createOscillator(), g = actx.createGain();
+        o.type = j === 0 ? 'triangle' : 'sine'; o.frequency.value = f;
+        const peak = j === 0 ? .045 : .03;
+        g.gain.setValueAtTime(0, t0);
+        g.gain.linearRampToValueAtTime(peak, t0 + 1.2);
+        g.gain.setValueAtTime(peak, t0 + CHORD_LEN - 1.4);
+        g.gain.linearRampToValueAtTime(0, t0 + CHORD_LEN);
+        o.connect(g); g.connect(master);
+        o.start(t0); o.stop(t0 + CHORD_LEN + .05);
+      });
+    });
+
+    [73.42, 110.00].forEach((f, i) => {
+      const o = actx.createOscillator(), g = actx.createGain();
+      o.type = 'sine'; o.frequency.value = f;
+      g.gain.setValueAtTime(0, startTime);
+      g.gain.linearRampToValueAtTime(i ? .02 : .028, startTime + 2.4);
+      g.gain.setValueAtTime(i ? .02 : .028, startTime + LOOP - 2);
+      g.gain.linearRampToValueAtTime(0, startTime + LOOP);
+      o.connect(g); g.connect(master);
+      o.start(startTime); o.stop(startTime + LOOP + .05);
+    });
+
+    for (let c = 0; c * 1.5 < LOOP; c++){
+      const cellStart = startTime + c * 1.5;
+      tablaHit(cellStart, true);
+      tablaHit(cellStart + .5, false);
+      tablaHit(cellStart + 1.0, false);
+      tablaHit(cellStart + 1.25, false);
+    }
+
+    const scale = [293.66,329.63,369.99,440.00,493.88,587.33,659.25,739.99,880.00];
+    const playPhrase = (phrase, from, beat) => {
+      let t = from;
+      phrase.forEach(([idx, len]) => {
+        const dur = len * beat;
+        sitarNote(scale[idx], t, dur);
+        t += dur;
+      });
+    };
+    playPhrase([[2,1],[3,1],[4,.5],[3,.5],[2,1],[1,1],[0,2],
+                [2,1],[3,1],[4,.5],[5,.5],[4,1],[3,1],[2,2]], startTime + 3.2, .62);
+    playPhrase([[3,1],[4,1],[5,.5],[4,.5],[3,1],[2,1],[1,2],
+                [3,1],[4,1],[5,.5],[6,.5],[5,1],[4,1],[3,2]], startTime + 19.6, .58);
+
+    [24.5, 24.66, 24.82, 30.4, 30.56].forEach((off, k) => {
+      const t = startTime + off;
+      const idx = [7,8,7,6,7][k];
+      const o = actx.createOscillator(), g = actx.createGain();
+      o.type = 'sine'; o.frequency.value = scale[idx] * 1.5;
+      g.gain.setValueAtTime(0, t);
+      g.gain.linearRampToValueAtTime(.05, t + .008);
+      g.gain.exponentialRampToValueAtTime(.0006, t + .5);
+      o.connect(g); g.connect(master);
+      o.start(t); o.stop(t + .55);
+    });
+  }
+
+  /* a short synthetic tail so the mix reads as one room, not a
+     pile of dry, disconnected samples                            */
+  function makeImpulse(){
+    const len = actx.sampleRate * 1.6;
+    const buf = actx.createBuffer(2, len, actx.sampleRate);
+    for (let ch = 0; ch < 2; ch++){
+      const d = buf.getChannelData(ch);
+      for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 2.6);
+    }
+    return buf;
+  }
+
   function startSynth(){
     actx = actx || new (window.AudioContext || window.webkitAudioContext)();
     if (!master){
       master = actx.createGain();
       master.gain.value = 0;
       const lp = actx.createBiquadFilter();
-      lp.type = 'lowpass'; lp.frequency.value = 2600;
-      master.connect(lp); lp.connect(actx.destination);
+      lp.type = 'lowpass'; lp.frequency.value = 4200;
+      const comp = actx.createDynamicsCompressor();
+      comp.threshold.value = -20; comp.knee.value = 26; comp.ratio.value = 3.2;
+      comp.attack.value = .01; comp.release.value = .28;
+      const verbSend = actx.createGain();
+      verbSend.gain.value = .22;
+      const verb = actx.createConvolver();
+      verb.buffer = makeImpulse();
+      master.connect(lp);
+      lp.connect(comp);
+      lp.connect(verbSend); verbSend.connect(verb); verb.connect(comp);
+      comp.connect(actx.destination);
     }
     master.gain.cancelScheduledValues(actx.currentTime);
-    master.gain.linearRampToValueAtTime(.16, actx.currentTime + 1.6);
+    master.gain.linearRampToValueAtTime(.48, actx.currentTime + 2.2);
 
-    /* soft drone underneath */
-    [130.81, 196.00].forEach((f, i) => {
-      const o = actx.createOscillator(), g = actx.createGain();
-      o.type = 'sine'; o.frequency.value = f;
-      g.gain.value = i ? .028 : .042;
-      o.connect(g); g.connect(master); o.start();
-    });
-
-    const scale = [261.63, 293.66, 329.63, 392.00, 440.00, 523.25, 587.33, 659.25];
-    let i = 0;
-    const pluck = () => {
-      const f = scale[[0,2,4,5,7,4,2,1,3,5,6,4][i % 12]] * (i % 24 < 12 ? 1 : .5);
-      const o = actx.createOscillator(), g = actx.createGain();
-      o.type = 'triangle'; o.frequency.value = f;
-      const now = actx.currentTime;
-      g.gain.setValueAtTime(0, now);
-      g.gain.linearRampToValueAtTime(.10, now + .012);
-      g.gain.exponentialRampToValueAtTime(.0008, now + 2.4);
-      o.connect(g); g.connect(master);
-      o.start(now); o.stop(now + 2.5);
-      i++;
-      timer = setTimeout(pluck, 620 + (i % 4 === 0 ? 380 : 0));
+    clearTimeout(timer);
+    const LOOP = 36;
+    const kickOff = start => {
+      scheduleLoop(start);
+      timer = setTimeout(() => kickOff(start + LOOP), (LOOP - 1.5) * 1000);
     };
-    pluck();
+    kickOff(actx.currentTime + .05);
   }
 
   return {
@@ -2526,25 +2676,18 @@ const Music = (() => {
     async play(){
       if (playing) return;
       playing = true;
-      if (CONFIG.assets.song){
-        (audio || useFile());
-        try { await audio.play(); fade(.55, 2200); }
-        catch { playing = false; throw new Error('blocked'); }
-      } else {
-        startSynth();
-      }
+      (audio || useFile());
+      try { await audio.play(); fade(.55, 2200); }
+      catch { playing = false; throw new Error('blocked'); }
     },
     pause(){
       playing = false;
       if (audio) { fade(0, 500); setTimeout(() => audio && audio.pause(), 520); }
-      if (master) master.gain.linearRampToValueAtTime(0, actx.currentTime + .4);
       clearTimeout(timer);
     },
     resume(){
       playing = true;
-      if (audio) { audio.play(); fade(.55, 900); }
-      else if (master) master.gain.linearRampToValueAtTime(.16, actx.currentTime + .8);
-      else startSynth();
+      if (audio) { audio.play().catch(() => {}); fade(.55, 900); }
     },
     get playing(){ return playing; }
   };
@@ -2846,6 +2989,22 @@ function boot(){
       setThemeColor('#efd9d7');
     }, OPEN_MS);
   };
+  /* no gesture guards the video's autoplay, so try to start music
+     right away, in step with it; browsers that block that get a
+     fallback on the guest's first touch/click/key press instead. */
+  let audioUnlocked = false;
+  const unlockAudio = () => {
+    if (audioUnlocked) return;
+    audioUnlocked = true;
+    Music.play()
+      .then(() => musicBtn.classList.remove('is-muted'))
+      .catch(() => musicBtn.classList.add('is-muted'))
+      .finally(() => musicBtn.classList.remove('is-hidden'));
+  };
+  addEventListener('pointerdown', unlockAudio, { once:true, passive:true });
+  addEventListener('keydown', unlockAudio, { once:true });
+  unlockAudio();
+
   if (coverVideo?.src){
     coverVideo.addEventListener('error', () => {
       const fallback = $('#coverPhoto');
@@ -2854,6 +3013,11 @@ function boot(){
       coverVideo.hidden = true;
       fallback.hidden = false;
       fallback.style.backgroundImage = `url("${A.cover}")`;
+      /* the video's autoplay path never binds a tap handler, so a
+         failed video needs its own — otherwise the cover, and the
+         music that only starts on open(), are both stuck.        */
+      $('#openBtn').addEventListener('click', open);
+      cover.addEventListener('click', open);
     }, { once:true });
     coverVideo.addEventListener('ended', () => {
       coverVideo.hidden = true;
@@ -2862,6 +3026,7 @@ function boot(){
       document.body.classList.remove('is-locked');
       observeReveals();
       setThemeColor('#efd9d7');
+      musicBtn.classList.remove('is-hidden');
     }, { once:true });
     coverVideo.play().catch(() => {});
   } else {
