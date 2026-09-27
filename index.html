@@ -52,6 +52,10 @@
   --gold:         #d8a441;
   --gold-pale:    #efcb86;
   --ivory:        #f6ece2;
+  /* --- festive accents, used sparingly for celebration touches - */
+  --festive-pink:   #c23670;
+  --festive-orange: #e07a3f;
+  --festive-teal:   #2f7a6b;
   /* --- structure ------------------------------------------ */
   --line:         rgba(107,33,28,.16);
   --line-soft:    rgba(107,33,28,.09);
@@ -167,15 +171,33 @@ button{ font:inherit; color:inherit; }
   object-position:center center;
   background:#d9c0bc;
   opacity:0;
-  transition:opacity .35s ease;
+  transition:opacity .55s ease;
 }
-.cover.has-cover-video .cover-video{ opacity:1; }
-.cover.has-cover-video .cover-photo,
+.cover.has-cover-video.is-playing .cover-video{ opacity:1; }
+.cover.has-cover-video .cover-photo{
+  display:block;
+  opacity:1;
+  filter:blur(3px) brightness(.82);
+  transform:scale(1.025);
+  animation:openingPosterZoom 7s ease-in-out infinite alternate;
+  transition:opacity .55s ease, filter .55s ease, transform .8s ease;
+}
+.cover.has-cover-video.is-playing .cover-photo{
+  opacity:0;
+  filter:blur(0) brightness(1);
+  transform:scale(1.06);
+  animation:none;
+}
+@keyframes openingPosterZoom{
+  from{ transform:scale(1.025); }
+  to{ transform:scale(1.09); }
+}
 .cover.has-cover-video #coverArt,
 .cover.has-cover-video .gate,
 .cover.has-cover-video .gate-bow,
 .cover.has-cover-video .ganesha{ display:none; }
-.cover.has-cover-video .cover-cta{ display:none; }
+.cover.has-cover-video .cover-cta{ z-index:8; }
+.cover.is-playing .cover-cta{ opacity:0; pointer-events:none; }
 .cover.has-cover-video.is-open .cover-video{ opacity:0; }
 .cover.has-cover-image .gate,
 .cover.has-cover-image .gate-bow,
@@ -488,6 +510,18 @@ button{ font:inherit; color:inherit; }
   to{ opacity:1; transform:none; }
 }
 .hero.has-hero-image .eyebrow{ color:#4e2727; font-weight:600; }
+.hero.has-hero-image .family-invite{
+  max-width:32ch;
+  margin:0 auto 10px;
+  font-family:var(--f-serif);
+  font-size:clamp(15px,4vw,18px);
+  font-style:italic;
+  font-weight:500;
+  line-height:1.55;
+  letter-spacing:.035em;
+  text-transform:none;
+  text-wrap:balance;
+}
 .hero.has-hero-image .hero-heart{ fill:#b96e78; }
 .hero.has-hero-image .name{
   color:#7e431f;
@@ -522,6 +556,7 @@ button{ font:inherit; color:inherit; }
   font-family:var(--f-name);
   font-size:clamp(52px,15vw,74px);
   line-height:1.02;
+  margin:0;
   color:var(--gold);
   background:linear-gradient(178deg,#f6dfa4 6%,#d8a441 52%,#b47c27 100%);
   -webkit-background-clip:text; background-clip:text;
@@ -554,13 +589,26 @@ button{ font:inherit; color:inherit; }
   font-style:italic; font-size:.9em; opacity:.75; margin-top:5px; }
 
 .scroll-cue{
-  position:absolute; left:0; right:0; bottom:5.5vh;
-  display:grid; justify-items:center; gap:6px;
-  font-size:11px; letter-spacing:.4em; text-transform:uppercase;
-  color:rgba(246,236,226,.6);
+  position:fixed; left:0; right:0;
+  margin-inline:auto;
+  z-index:4;
+  bottom:calc(3vh + env(safe-area-inset-bottom));
+  display:grid; justify-items:center; gap:8px; width:max-content;
+  font-size:14px; font-weight:700; letter-spacing:.22em; text-transform:uppercase;
+  color:rgba(246,236,226,.92);
+  text-shadow:0 2px 8px rgba(0,0,0,.55);
+  pointer-events:none;
+  transition:opacity .25s ease, visibility .25s;
+  animation:scrollCueJump 2.2s cubic-bezier(.45,0,.25,1) infinite;
 }
-.scroll-cue svg{ width:17px; stroke:rgba(246,236,226,.6); animation:nudge 2.2s ease-in-out infinite; }
-@keyframes nudge{ 0%,100%{ transform:translateY(0); } 50%{ transform:translateY(6px); } }
+.scroll-cue.is-scrolled{ opacity:0; visibility:hidden; }
+.scroll-cue svg{ width:24px; height:24px; stroke:currentColor; filter:drop-shadow(0 2px 5px rgba(0,0,0,.45)); }
+@keyframes scrollCueJump{
+  0%,55%,100%{ transform:translateY(0); }
+  68%{ transform:translateY(-11px); }
+  80%{ transform:translateY(3px); }
+  90%{ transform:translateY(-4px); }
+}
 
 /* ============================================================
    3 · SECTIONS on blush
@@ -576,7 +624,22 @@ button{ font:inherit; color:inherit; }
 /* soften the seam where the night sky meets the blush */
 .seam{ height:70px; background:linear-gradient(to bottom, var(--night), var(--blush-soft)); }
 
-.sec-head{ text-align:center; margin-bottom:clamp(26px,7vw,38px); }
+.sec-head{ position:relative; text-align:center; margin-bottom:clamp(26px,7vw,38px); }
+/* a scatter of festive confetti flecks behind each section title */
+.sec-head::before{
+  content:'';
+  position:absolute; left:-12px; right:-12px; top:-16px; height:64px;
+  background-image:
+    radial-gradient(3px 3px at 8% 25%, var(--festive-pink) 99%, transparent 100%),
+    radial-gradient(2.4px 2.4px at 22% 65%, var(--festive-teal) 99%, transparent 100%),
+    radial-gradient(3px 3px at 40% 15%, var(--gold) 99%, transparent 100%),
+    radial-gradient(2.4px 2.4px at 60% 60%, var(--festive-orange) 99%, transparent 100%),
+    radial-gradient(3px 3px at 78% 25%, var(--festive-pink) 99%, transparent 100%),
+    radial-gradient(2.4px 2.4px at 92% 60%, var(--gold) 99%, transparent 100%);
+  opacity:.5;
+  pointer-events:none;
+}
+.sec-head > *{ position:relative; }
 .ico{ width:26px; height:26px; margin:0 auto 12px; stroke:var(--oxblood-soft); }
 .script{
   font-family:var(--f-script);
@@ -673,6 +736,8 @@ button{ font:inherit; color:inherit; }
   gap:clamp(7px,2.4vw,12px);
 }
 .cell{
+  position:relative;
+  overflow:hidden;
   background:var(--cream);
   border:1px solid var(--line-soft);
   border-radius:3px;
@@ -680,6 +745,12 @@ button{ font:inherit; color:inherit; }
   text-align:center;
   box-shadow:0 3px 10px rgba(107,33,28,.05);
 }
+/* a thin festive accent stripe, one colour per tile */
+.cell::before{ content:''; position:absolute; top:0; left:0; right:0; height:4px; }
+.cell:nth-child(1)::before{ background:var(--festive-pink); }
+.cell:nth-child(2)::before{ background:var(--gold); }
+.cell:nth-child(3)::before{ background:var(--festive-teal); }
+.cell:nth-child(4)::before{ background:var(--festive-orange); }
 .cell b{
   display:block;
   font-weight:600;
@@ -720,13 +791,19 @@ button{ font:inherit; color:inherit; }
 }
 .tl-item:nth-child(even) .tl-card{ grid-column:2; }
 .tl-item:nth-child(odd) .tl-card{ grid-column:1; }
+/* each celebration gets its own colour, cycling through the palette */
+.tl-item:nth-child(5n+1){ --event-color:var(--festive-pink); }
+.tl-item:nth-child(5n+2){ --event-color:var(--gold); }
+.tl-item:nth-child(5n+3){ --event-color:var(--festive-teal); }
+.tl-item:nth-child(5n+4){ --event-color:var(--festive-orange); }
+.tl-item:nth-child(5n+5){ --event-color:var(--festive-pink); }
 .tl-dot{
   position:absolute;
   left:50%; top:50%; z-index:2;
   width:12px; height:12px;
   border:3px solid var(--cream);
   border-radius:50%;
-  background:var(--gold);
+  background:var(--event-color, var(--gold));
   box-shadow:0 0 0 3px rgba(138,65,58,.2);
   transform:translate(-50%,-50%);
 }
@@ -742,6 +819,8 @@ button{ font:inherit; color:inherit; }
   border-radius:7px;
   box-shadow:0 7px 18px rgba(107,33,28,.1);
 }
+.tl-item:nth-child(odd) .tl-card{ border-right:3px solid var(--event-color); }
+.tl-item:nth-child(even) .tl-card{ border-left:3px solid var(--event-color); }
 .tl-card::after{
   content:'';
   position:absolute;
@@ -808,6 +887,9 @@ button{ font:inherit; color:inherit; }
   color:var(--rose-ink); max-width:32ch; margin-inline:auto;
   text-wrap:pretty;
 }
+.transport-list{ display:grid; gap:18px; max-width:34ch; margin-inline:auto; }
+.transport-row{ margin:0; color:var(--rose-ink); font-size:clamp(15.5px,4.2vw,17px); line-height:1.65; }
+.transport-row strong{ color:var(--oxblood); font-weight:600; }
 
 /* ---------- RSVP form ------------------------------------ */
 .form{ display:grid; gap:17px; max-width:34ch; margin-inline:auto; }
@@ -839,12 +921,13 @@ button{ font:inherit; color:inherit; }
 }
 .submit{
   margin-top:6px; padding:15px;
-  background:var(--oxblood); color:var(--ivory);
+  background:linear-gradient(135deg, var(--oxblood) 0%, var(--festive-pink) 100%);
+  color:var(--ivory);
   border:0; border-radius:2px; cursor:pointer;
   font-size:15px; letter-spacing:.1em;
   transition:background .25s ease, transform .12s ease;
 }
-.submit:hover{ background:#571812; }
+.submit:hover{ background:linear-gradient(135deg, #571812 0%, #a52d5e 100%); }
 .submit:active{ transform:translateY(1px); }
 .form-note{ font-size:13px; font-style:italic; color:var(--rose-ink); text-align:center; opacity:.8; }
 .thanks{
@@ -858,10 +941,29 @@ button{ font:inherit; color:inherit; }
 
 /* ---------- closing -------------------------------------- */
 .closing{
+  position:relative;
+  overflow:hidden;
   padding:clamp(60px,15vw,88px) var(--pad) clamp(72px,17vw,100px);
   background:linear-gradient(to bottom, var(--blush-soft), var(--blush));
   text-align:center;
 }
+/* a light scatter of festive confetti behind the closing message */
+.closing::before{
+  content:'';
+  position:absolute; inset:0;
+  background-image:
+    radial-gradient(3px 3px at 10% 15%, var(--festive-pink) 99%, transparent 100%),
+    radial-gradient(2.6px 2.6px at 25% 72%, var(--gold) 99%, transparent 100%),
+    radial-gradient(3px 3px at 45% 30%, var(--festive-teal) 99%, transparent 100%),
+    radial-gradient(2.4px 2.4px at 62% 82%, var(--festive-orange) 99%, transparent 100%),
+    radial-gradient(3px 3px at 80% 20%, var(--festive-pink) 99%, transparent 100%),
+    radial-gradient(2.6px 2.6px at 92% 65%, var(--gold) 99%, transparent 100%),
+    radial-gradient(2.4px 2.4px at 15% 90%, var(--festive-teal) 99%, transparent 100%),
+    radial-gradient(3px 3px at 70% 55%, var(--festive-orange) 99%, transparent 100%);
+  opacity:.32;
+  pointer-events:none;
+}
+.closing > *{ position:relative; }
 .closing .script{ font-size:clamp(30px,8.2vw,38px); max-width:22ch; margin-inline:auto; }
 .closing .signature{
   font-family:var(--f-name);
@@ -896,11 +998,14 @@ button{ font:inherit; color:inherit; }
 #musicBtn .off{ display:none; }
 #musicBtn.is-muted .on{ display:none; }
 #musicBtn.is-muted .off{ display:block; }
+#langBtn{ bottom:calc(16px + env(safe-area-inset-bottom)); left:14px; }
+#langLabel{ font-family:var(--f-any); }
 .ctl.is-hidden{ opacity:0; pointer-events:none; }
 
 /* desktop: keep the controls hugging the column */
 @media (min-width:600px){
   #musicBtn{ right:calc(50vw - var(--col)/2 + 14px); }
+  #langBtn{ left:calc(50vw - var(--col)/2 + 14px); }
 }
 
 /* ============================================================
@@ -943,6 +1048,11 @@ html.indic .cell span,
 html.indic .field > label{ letter-spacing:.04em; }
 html.indic .eyebrow,
 html.indic .hero-date{ letter-spacing:.12em; }
+html.indic .hero.has-hero-image .family-invite{
+  font-family:var(--f-indic);
+  font-style:normal;
+  letter-spacing:.04em;
+}
 /* Bengali sits a touch larger on the same optical line */
 html[lang="bn"] .script{ font-size:clamp(23px,6.1vw,29px); }
 html[lang="bn"] .invocation{ font-family:var(--f-bangla); }
@@ -950,7 +1060,8 @@ html[lang="bn"] .invocation{ font-family:var(--f-bangla); }
 @media (prefers-reduced-motion:reduce){
   *{ animation-duration:.001ms !important; animation-iteration-count:1 !important; }
   .reveal{ opacity:1; transform:none; transition:none; }
-  .scroll-cue svg{ animation:none; }
+  .scroll-cue{ animation:none; }
+  .cover.has-cover-video .cover-photo{ animation:none; }
   /* the same sequence, collapsed to about half a second —
      OPEN_MS in the script matches this branch too */
   .gate-half{ transition-duration:.4s; transition-delay:0s; }
@@ -982,7 +1093,7 @@ html[lang="bn"] .invocation{ font-family:var(--f-bangla); }
 <div class="cover" id="cover">
   <div class="cover-stage">
     <div class="cover-photo" id="coverPhoto" hidden></div>
-        <video class="cover-video" id="coverVideo" hidden autoplay muted playsinline preload="auto"
+        <video class="cover-video" id="coverVideo" hidden muted playsinline preload="auto"
           aria-label="Wedding invitation opening video"></video>
     <canvas id="coverArt"></canvas>
     <div class="cover-vignette"></div>
@@ -1015,6 +1126,9 @@ html[lang="bn"] .invocation{ font-family:var(--f-bangla); }
   <span class="on"  data-ico="volumeOn"></span>
   <span class="off" data-ico="volumeOff"></span>
 </button>
+<button class="ctl is-hidden" id="langBtn" type="button" aria-label="Change language">
+  <span data-ico="globe"></span><span id="langLabel">हिन्दी</span>
+</button>
 
 <!-- ============================================================
      THE INVITATION
@@ -1030,7 +1144,7 @@ html[lang="bn"] .invocation{ font-family:var(--f-bangla); }
 
     <div class="hero-inner">
       <p class="invocation hero-invocation" id="heroInvocation"></p>
-      <p class="eyebrow" data-i18n="gettingMarried">We're getting married</p>
+      <p class="eyebrow family-invite" data-i18n="gettingMarried">We're getting married</p>
       <svg class="hero-heart" data-ico="heartSolid" aria-hidden="true"></svg>
 
       <!-- Left empty on purpose: renderStatic() fills these from
@@ -1117,7 +1231,7 @@ html[lang="bn"] .invocation{ font-family:var(--f-bangla); }
       <h2 class="script" data-i18n="transportTitle"></h2>
       <div class="rule" aria-hidden="true"></div>
     </div>
-    <p class="body-line reveal" style="--d:100ms" id="transportText"></p>
+    <div class="transport-list reveal" style="--d:100ms" id="transportText"></div>
   </section>
 
   <!-- ---------- RSVP ---------- -->
@@ -1134,8 +1248,8 @@ html[lang="bn"] .invocation{ font-family:var(--f-bangla); }
         <input id="f-name" name="name" type="text" required autocomplete="name" data-i18n-ph="fNamePh">
       </div>
       <div class="field">
-        <label for="f-email"><span data-i18n="fEmail"></span> <span class="req">*</span></label>
-        <input id="f-email" name="email" type="email" required autocomplete="email" data-i18n-ph="fEmailPh">
+        <label for="f-email"><span data-i18n="fEmail"></span></label>
+        <input id="f-email" name="email" type="email" autocomplete="email" data-i18n-ph="fEmailPh">
       </div>
       <div class="field">
         <label for="f-guests" data-i18n="fGuests"></label>
@@ -1215,8 +1329,27 @@ const CONFIG = {
 
   /* ---- 1. the couple ------------------------------------ */
   couple: {
-        a: { name: "Tania", parents: "Daughter of Rina & Late Bhaskar Nag" },
-        b: { name: "Satyam", parents: "Son of Savita & Sanjay Singh" },
+        a: {
+          name: { en: "Tania", hi: "तानिया", bn: "তানিয়া" },
+          parents: {
+            en: "Daughter of Rina & Late Bhaskar Nag",
+            hi: "रीना एवं स्व. भास्कर नाग की पुत्री",
+            bn: "রীনা ও প্রয়াত ভাস্কর নাগের কন্যা"
+          }
+        },
+        b: {
+          name: { en: "Satyam", hi: "सत्यम", bn: "সত্যম" },
+          parents: {
+            en: "Son of Savita & Sanjay Singh",
+            hi: "सविता एवं संजय सिंह के पुत्र",
+            bn: "সবিতা ও সঞ্জয় সিংহের পুত্র"
+          }
+        },
+        familySignature: {
+          en: "Friends and Family",
+          hi: "वर-वधू के समस्त परिवारजन",
+          bn: "বর-কনের সমগ্র পরিবারবর্গ"
+        },
         hashtag: "#SadaDasTan",
         /* substrings inside `hashtag` to render bold, in order      */
         hashtagEmphasis: ["Sa", "Tan"]
@@ -1267,7 +1400,26 @@ const CONFIG = {
       embed: "" },
   ],
   /* ---- 5. travel information ---------------------------- */
-  transport: "From Netaji Subhash Chandra Bose International Airport, the venue is easily reached by cab or private car. Guests travelling by train may arrive at Barrackpore Railway Station and continue by cab or local transport. For those driving, the venue is on S.N. Banerjee Road, Chiriamore, Barrackpore, beside HP Petroleum. Valet parking is available at the entrance gate for your convenience.",
+  transport: {
+    en: [
+      { label:"By air:", text:"From Netaji Subhash Chandra Bose International Airport (Kolkata Airport), the venue is easily reached by cab or private car." },
+      { label:"By rail:", text:"Guests may arrive at Barrackpore Railway Station and continue to the venue by cab or local transport." },
+      { label:"By road (private vehicle):", text:"The venue is on S.N. Banerjee Road, Chiriamore, Barrackpore, near the HP petrol pump.", emphasis:["Chiriamore, Barrackpore", "near the HP petrol pump"] },
+      { label:"Parking:", text:"Valet parking is available at the venue's main entrance for your convenience." }
+    ],
+    hi: [
+      { label:"हवाई मार्ग द्वारा:", text:"नेताजी सुभाष चंद्र बोस अंतर्राष्ट्रीय हवाई अड्डे (कोलकाता एयरपोर्ट) से विवाह स्थल के लिए कैब या निजी कार द्वारा आसानी से पहुँचा जा सकता है।" },
+      { label:"रेल मार्ग द्वारा:", text:"ट्रेन से आने वाले अतिथि बैरकपुर रेलवे स्टेशन पर उतर सकते हैं और वहाँ से कैब या स्थानीय वाहनों द्वारा विवाह स्थल तक पहुँच सकते हैं।" },
+      { label:"सड़क मार्ग द्वारा (निजी वाहन):", text:"यदि आप स्वयं गाड़ी चलाकर आ रहे हैं, तो विवाह स्थल एस.एन. बनर्जी रोड, चिड़ियामोड़, बैरकपुर (HP पेट्रोल पंप के पास) स्थित है।", emphasis:["चिड़ियामोड़, बैरकपुर", "HP पेट्रोल पंप के पास"] },
+      { label:"पार्किंग की सुविधा:", text:"आपकी सुविधा के लिए विवाह स्थल के मुख्य प्रवेश द्वार पर वैले पार्किंग की उत्तम व्यवस्था उपलब्ध है।" }
+    ],
+    bn: [
+      { label:"বিমানপথে:", text:"নেতাজি সুভাষচন্দ্র বসু আন্তর্জাতিক বিমানবন্দর (কলকাতা বিমানবন্দর) থেকে ক্যাব বা ব্যক্তিগত গাড়িতে সহজেই বিবাহস্থলে পৌঁছানো যায়।" },
+      { label:"রেলপথে:", text:"ট্রেনে আসা অতিথিরা ব্যারাকপুর রেলওয়ে স্টেশনে নেমে সেখান থেকে ক্যাব বা স্থানীয় পরিবহনে বিবাহস্থলে পৌঁছাতে পারেন।" },
+      { label:"সড়কপথে (নিজস্ব গাড়িতে):", text:"আপনি যদি নিজে গাড়ি চালিয়ে আসেন, তবে বিবাহস্থলটি এস. এন. ব্যানার্জি রোড, চিড়িয়ামোড়, ব্যারাকপুরে (এইচপি পেট্রোল পাম্পের কাছে) অবস্থিত।", emphasis:["চিড়িয়ামোড়, ব্যারাকপুরে", "এইচপি পেট্রোল পাম্পের কাছে"] },
+      { label:"পার্কিংয়ের সুবিধা:", text:"আপনাদের সুবিধার জন্য বিবাহস্থলের প্রধান প্রবেশদ্বারে উন্নত ভ্যালেট পার্কিংয়ের ব্যবস্থা রয়েছে।" }
+    ]
+  },
   rsvpBy:    { en: "Kindly respond by 15 November 2026",
                hi: "कृपया 20 नवंबर 2026 तक उत्तर दें",
                bn: "অনুগ্রহ করে 20 নভেম্বর 2026-এর মধ্যে জানান" },
@@ -1354,6 +1506,7 @@ const CONFIG = {
      Leave a value "" and a drawn placeholder is used instead.  */
   assets: {
     cover:   "assets/firstpage.png",  // the front-page image behind the opening
+    openingPoster: "assets/opening-poster.png",  // blurred image shown before tap
     coverVideo: "assets/front_videp.mp4",  // the animated front-page opening
     hero:    "assets/firstpage.png",  // the first-page background behind the names
     photo:   "demo_Img.jpg",  // the couple photo (4:3 works best)
@@ -1371,7 +1524,7 @@ const CONFIG = {
    ================================================================ */
 const STRINGS = {
   en: {
-    tapToOpen:"tap to open", scroll:"Scroll", gettingMarried:"We're getting married",
+    tapToOpen:"tap to open", scroll:"Scroll", gettingMarried:"We solicit your gracious presence with family and friends on the auspicious occasion of the marriage of our children:",
     celebration:"A celebration of love, joy, and togetherness",
     inviteLine:"We warmly invite you to be a part of this special day, and to bless the beginning of a beautiful forever.",
     scratchTitle:"Scratch to Reveal", youreInvited:"You're Invited!",
@@ -1392,21 +1545,21 @@ const STRINGS = {
     fMessage:"Your Message", fMessagePh:"Write your wishes…",
     fSend:"Send Message", fSending:"Sending…",
     thanksTitle:"Thank you!", thanksBody:"Your response is on its way to us.",
-    formErr:"Please fill in your name, email and whether you'll be joining us.",
+    formErr:"Please fill in your name and whether you'll be joining us.",
     formFail:"That didn't go through — your reply hasn't reached us yet.",
     formFailWa:"Please send it to us on WhatsApp at",
     formFailEmail:"Please email it to us at",
-    closingLine:"We can't wait to celebrate with you!",
+    closingLine:"With best compliments from",
     langOther:"हिन्दी"
   },
   hi: {
-    tapToOpen:"खोलने के लिए स्पर्श करें", scroll:"नीचे देखें", gettingMarried:"हम विवाह करने जा रहे हैं",
-    celebration:"प्रेम, आनंद और साथ का एक उत्सव",
-    inviteLine:"हम आपको इस विशेष दिन का हिस्सा बनने और एक सुंदर सदा-सदा की शुरुआत को आशीर्वाद देने के लिए सादर आमंत्रित करते हैं।",
-    scratchTitle:"खुरचकर देखिए", youreInvited:"आप आमंत्रित हैं!",
-    scratchHint:"तारीख़ देखने के लिए दिल पर उँगली फिराएँ",
+    tapToOpen:"खोलने के लिए स्पर्श करें", scroll:"नीचे देखें", gettingMarried:"परमपिता परमेश्वर एवं हमारे पूर्वजों की असीम अनुकम्पा से, हमारे बच्चों के मंगल परिणय की मांगलिक बेला पर आप सपरिवार सादर आमंत्रित हैं। पधारकर नवयुगल को अपना स्नेह एवं आशीर्वाद प्रदान कर हमें अनुगृहीत करें।",
+    celebration:"दो हृदयों और दो परिवारों के मिलन का मंगल उत्सव",
+    inviteLine:"इस शुभ अवसर पर आपका स्नेह और साथ हमारी खुशियों को और भी विशेष बना देगा।",
+    scratchTitle:"शुभ विवाह मुहूर्त", youreInvited:"आप आमंत्रित हैं!",
+    scratchHint:"शुभ विवाह की तारीख़ जानने के लिए यहाँ स्क्रैच करें",
     photoCaption:"जहाँ से सब शुरू हुआ",
-    countdownTitle:"सदा की ओर गिनती",
+    countdownTitle:"परिणय बेला की प्रतीक्षा...",
     days:"दिन", hours:"घंटे", minutes:"मिनट", seconds:"सेकंड",
     addToCal:"कैलेंडर में जोड़ें",
     theDayIsHere:"आज वही दिन है।",
@@ -1421,22 +1574,22 @@ const STRINGS = {
     fMessage:"आपका संदेश", fMessagePh:"अपनी शुभकामनाएँ लिखें…",
     fSend:"संदेश भेजें", fSending:"भेजा जा रहा है…",
     thanksTitle:"धन्यवाद!", thanksBody:"आपका उत्तर हमारे पास पहुँच रहा है।",
-    formErr:"कृपया अपना नाम, ईमेल और उपस्थिति की जानकारी भरें।",
+    formErr:"कृपया अपना नाम और उपस्थिति की जानकारी भरें।",
     formFail:"संदेश नहीं जा सका — आपका उत्तर अभी हम तक नहीं पहुँचा है।",
     formFailWa:"कृपया इसे व्हाट्सएप पर हमें भेजें:",
     formFailEmail:"कृपया इसे हमें ईमेल करें:",
-    closingLine:"हम आपके साथ जश्न मनाने के लिए उत्सुक हैं!",
+    closingLine:"दर्शनाभिलाषी:",
     langOther:"বাংলা"
   },
   bn: {
     tapToOpen:"খুলতে স্পর্শ করুন", scroll:"নিচে দেখুন",
-    gettingMarried:"আমরা বিবাহবন্ধনে আবদ্ধ হচ্ছি",
-    celebration:"প্রেম, আনন্দ ও একসাথে থাকার উৎসব",
-    inviteLine:"আমরা আপনাকে এই বিশেষ দিনের অংশ হতে এবং এক সুন্দর চিরন্তন যাত্রার শুরুতে আশীর্বাদ করতে সাদরে আমন্ত্রণ জানাই।",
-    scratchTitle:"ঘষে দেখুন", youreInvited:"আপনি আমন্ত্রিত!",
-    scratchHint:"তারিখ দেখতে হৃদয়ের উপর আঙুল চালান",
-    photoCaption:"যেখান থেকে সব শুরু",
-    countdownTitle:"চিরন্তনের অপেক্ষায়",
+    gettingMarried:"আমাদের সন্তানদের শুভ বিবাহ উপলক্ষে পরিবার ও বন্ধুদের সঙ্গে আপনার সস্নেহ উপস্থিতি কামনা করছি:",
+    celebration:"দুই হৃদয় ও দুই পরিবারের মিলনের মঙ্গল উৎসব",
+    inviteLine:"এই শুভ উপলক্ষে আপনার স্নেহ ও সান্নিধ্য আমাদের আনন্দকে আরও বিশেষ করে তুলবে।",
+    scratchTitle:"শুভ বিবাহের লগ্ন", youreInvited:"আপনি আমন্ত্রিত!",
+    scratchHint:"শুভ বিবাহের তারিখ জানতে এখানে স্ক্র্যাচ করুন",
+    photoCaption:"যেখান থেকে সব শুরু হয়েছিল",
+    countdownTitle:"পরিণয় লগ্নের প্রতীক্ষায়...",
     days:"দিন", hours:"ঘণ্টা", minutes:"মিনিট", seconds:"সেকেন্ড",
     addToCal:"ক্যালেন্ডারে যোগ করুন",
     theDayIsHere:"আজই সেই দিন।",
@@ -1446,16 +1599,16 @@ const STRINGS = {
     fName:"আপনার নাম", fNamePh:"আপনার পুরো নাম",
     fEmail:"ইমেল", fEmailPh:"you@example.com",
     fGuests:"অতিথির সংখ্যা", fGuestsPh:"1",
-    fAttend:"আপনি আসবেন কি?", fSelect:"নির্বাচন করুন…",
-    fYes:"আনন্দের সঙ্গে আসছি", fNo:"দুঃখিত, আসতে পারছি না",
+    fAttend:"আপনি কি উপস্থিত থাকবেন?", fSelect:"বেছে নিন…",
+    fYes:"সানন্দে গ্রহণ করছি", fNo:"দুঃখের সঙ্গে অপারগ",
     fMessage:"আপনার বার্তা", fMessagePh:"আপনার শুভেচ্ছা লিখুন…",
     fSend:"বার্তা পাঠান", fSending:"পাঠানো হচ্ছে…",
     thanksTitle:"ধন্যবাদ!", thanksBody:"আপনার উত্তর আমাদের কাছে পৌঁছচ্ছে।",
-    formErr:"অনুগ্রহ করে আপনার নাম, ইমেল এবং উপস্থিতির তথ্য পূরণ করুন।",
+    formErr:"অনুগ্রহ করে আপনার নাম এবং উপস্থিতির তথ্য পূরণ করুন।",
     formFail:"বার্তাটি পাঠানো যায়নি — আপনার উত্তর এখনও আমাদের কাছে পৌঁছায়নি।",
-    formFailWa:"অনুগ্রহ করে হোয়াটসঅ্যাপে আমাদের পাঠান:",
-    formFailEmail:"অনুগ্রহ করে আমাদের ইমেল করুন:",
-    closingLine:"আপনার সঙ্গে উৎসব করার অপেক্ষায় আছি!",
+    formFailWa:"অনুগ্রহ করে এটি হোয়াটসঅ্যাপে আমাদের পাঠান:",
+    formFailEmail:"অনুগ্রহ করে এটি আমাদের ইমেল করুন:",
+    closingLine:"দর্শনাভিলাষী:",
     langOther:"English"
   }
 };
@@ -2126,7 +2279,7 @@ function renderStatic(){
   $('#nameB').textContent   = v(c.b.name);
   $('#parentA').textContent = v(c.a.parents);
   $('#parentB').textContent = v(c.b.parents);
-  $('#signature').textContent = `${v(c.a.name)} & ${v(c.b.name)}`;
+  $('#signature').textContent = v(c.familySignature);
   $('#hashtag').innerHTML = highlightSubstrings(c.hashtag || '', c.hashtagEmphasis || []);
 
   const loc  = LOCALES[LANG] || 'en-IN';
@@ -2152,7 +2305,28 @@ function renderStatic(){
   const art = $('#nicheArt');
   if (art) art.setAttribute('aria-label', spoken || 'Shree Ganesha');
 
-  $('#transportText').textContent = v(CONFIG.transport);
+  const transport = $('#transportText');
+  transport.textContent = '';
+  v(CONFIG.transport).forEach(item => {
+    const row = el('p', 'transport-row');
+    const label = el('strong');
+    label.textContent = item.label + ' ';
+    row.appendChild(label);
+
+    let remaining = item.text;
+    (item.emphasis || []).forEach(part => {
+      const index = remaining.indexOf(part);
+      if (index < 0) return;
+      row.append(document.createTextNode(remaining.slice(0, index)));
+      const strong = el('strong');
+      strong.textContent = part;
+      row.appendChild(strong);
+      remaining = remaining.slice(index + part.length);
+    });
+    row.append(document.createTextNode(remaining));
+    transport.appendChild(row);
+  });
+
   $('#formNote').textContent      = v(CONFIG.rsvpBy);
 
   /* countdown footnote doubles as the calendar link */
@@ -2268,6 +2442,7 @@ function initScratch(){
   const cv = $('#scratchCanvas');
   const hint = $('#scratchHint');
   let ctx, dpr = 1, done = false, moves = 0, drawing = false, last = null;
+  let autoFrame, autoScratching = false;
 
   function paint(){
     const r = cv.getBoundingClientRect();
@@ -2319,12 +2494,45 @@ function initScratch(){
     return total ? gone / total : 0;
   }
 
-  function finish(){
+  function finish(celebrate = true){
     if (done) return;
     done = true;
     cv.classList.add('is-done');
     hint.classList.add('is-hidden');
-    burstFireworks($('#scratchWrap'));
+    if (celebrate) burstFireworks($('#scratchWrap'));
+  }
+
+  function autoReveal(){
+    if (done || drawing || autoScratching) return;
+    autoScratching = true;
+    const r = cv.getBoundingClientRect();
+    const points = [];
+    for (let row = 0; row < 8; row++){
+      const y = r.height * (.18 + row * .09);
+      for (let column = 0; column <= 20; column++){
+        const progress = column / 20;
+        const x = r.width * (row % 2 ? .88 - progress * .76 : .12 + progress * .76);
+        points.push({ x, y });
+      }
+    }
+    let drawn = 0;
+    const started = performance.now();
+    const scratch = now => {
+      if (!autoScratching || done) return;
+      const target = Math.min(points.length, Math.ceil(points.length * (now - started) / 2400));
+      while (drawn < target){
+        const point = points[drawn++];
+        erase(point.x, point.y);
+      }
+      if (drawn < points.length){
+        autoFrame = requestAnimationFrame(scratch);
+      } else {
+        autoScratching = false;
+        last = null;
+        finish(false);
+      }
+    };
+    autoFrame = requestAnimationFrame(scratch);
   }
 
   const pos = e => {
@@ -2333,6 +2541,10 @@ function initScratch(){
   };
   cv.addEventListener('pointerdown', e => {
     if (done) return;
+    if (autoScratching){
+      autoScratching = false;
+      cancelAnimationFrame(autoFrame);
+    }
     drawing = true; last = null;
     cv.setPointerCapture?.(e.pointerId);
     const p = pos(e); erase(p.x, p.y);
@@ -2360,6 +2572,7 @@ function initScratch(){
 
   paint();
   addEventListener('resize', () => { if (!done) paint(); }, { passive:true });
+  return { autoReveal };
 }
 
 /* ================================================================
@@ -2808,7 +3021,7 @@ function initRsvp(){
       message:   (f.get('message') || '').toString().trim()
     };
 
-    if (!d.name || !d.email || !d.attending){
+    if (!d.name || !d.attending){
       note.textContent = t('formErr');
       note.style.color = 'var(--oxblood)';
       return;
@@ -2870,6 +3083,8 @@ function applyLang(next){
   document.documentElement.classList.toggle('indic', LANG !== 'en');
   $$('[data-i18n]').forEach(n => n.textContent = t(n.dataset.i18n));
   $$('[data-i18n-ph]').forEach(n => n.placeholder = t(n.dataset.i18nPh));
+  $('#scratchCanvas').setAttribute('aria-label', t('scratchHint'));
+  $('#langLabel').textContent = t('langOther');
   renderStatic();
   renderTimeline();
   renderVenues();
@@ -2908,6 +3123,9 @@ function boot(){
   const A = CONFIG.assets;
   const coverVideoEl = $('#coverVideo');
   if (A.coverVideo){
+    const poster = $('#coverPhoto');
+    poster.hidden = false;
+    poster.style.backgroundImage = `url("${A.openingPoster || A.cover}")`;
     coverVideoEl.src = A.coverVideo;
     coverVideoEl.hidden = false;
     $('#cover').classList.add('has-cover-video');
@@ -2932,16 +3150,22 @@ function boot(){
   else drawHeroArt();
 
   applyLang(LANG);
+  $('#langBtn').classList.remove('is-hidden');
 
   startCountdown();
-  initScratch();
+  const scratch = initScratch();
   initRsvp();
 
   /* keep the page still behind the closed gate */
   document.body.classList.add('is-locked');
 
   /* --- open the gate ------------------------------------- */
-  const cover = $('#cover'), musicBtn = $('#musicBtn'), coverVideo = $('#coverVideo');
+  const cover = $('#cover'), musicBtn = $('#musicBtn'), langBtn = $('#langBtn'), coverVideo = $('#coverVideo');
+
+  const scrollCue = $('.scroll-cue');
+  const syncScrollCue = () => scrollCue.classList.toggle('is-scrolled', scrollY > 24);
+  addEventListener('scroll', syncScrollCue, { passive:true });
+  syncScrollCue();
 
       /* Match the cover's final fade and the bow-opening motion. */
       const OPEN_MS = reduceMotion ? 750 : 3900;
@@ -2954,7 +3178,71 @@ function boot(){
   };
 
   let opened = false;
-  const open = async ({ restartVideo = true } = {}) => {
+  let finishTimer;
+  let guidedScrollTimer;
+  let guidedScrollFrame;
+  let guidedScrollStopped = false;
+  const guidedScrollEvents = ['wheel', 'touchstart', 'pointerdown'];
+  const stopGuidedScroll = () => {
+    guidedScrollStopped = true;
+    clearTimeout(guidedScrollTimer);
+    cancelAnimationFrame(guidedScrollFrame);
+    guidedScrollEvents.forEach(type => removeEventListener(type, stopGuidedScroll));
+    removeEventListener('keydown', stopGuidedScrollOnKey);
+  };
+  const stopGuidedScrollOnKey = event => {
+    if (['ArrowDown', 'ArrowUp', 'PageDown', 'PageUp', 'Home', 'End', ' '].includes(event.key)){
+      stopGuidedScroll();
+    }
+  };
+  const startGuidedScroll = () => {
+    if (reduceMotion || guidedScrollStopped) return;
+    guidedScrollEvents.forEach(type => addEventListener(type, stopGuidedScroll, { passive:true }));
+    addEventListener('keydown', stopGuidedScrollOnKey);
+    guidedScrollTimer = setTimeout(() => {
+      let previousTime = performance.now();
+      const step = currentTime => {
+        if (guidedScrollStopped) return;
+        const distance = 26 * Math.min(currentTime - previousTime, 50) / 1000;
+        previousTime = currentTime;
+        scrollBy(0, distance);
+        const scratchRect = $('#scratchWrap').getBoundingClientRect();
+        if (scratchRect.top < innerHeight * .78 && scratchRect.bottom > innerHeight * .2){
+          scratch.autoReveal();
+        }
+        if (scrollY + innerHeight >= document.documentElement.scrollHeight - 1){
+          stopGuidedScroll();
+          return;
+        }
+        guidedScrollFrame = requestAnimationFrame(step);
+      };
+      guidedScrollFrame = requestAnimationFrame(step);
+    }, 4500);
+  };
+  const finishOpen = () => {
+    if (!cover.isConnected) return;
+    $('#hero').classList.add('intro-active');
+    document.body.classList.remove('is-locked');
+    observeReveals();
+    cover.remove();
+    musicBtn.classList.remove('is-hidden');
+    setThemeColor('#efd9d7');
+    startGuidedScroll();
+  };
+  const startFallbackOpen = () => {
+    cover.classList.add('is-open');
+    clearTimeout(finishTimer);
+    finishTimer = setTimeout(finishOpen, OPEN_MS);
+  };
+  const showCoverImage = () => {
+    const fallback = $('#coverPhoto');
+    cover.classList.remove('has-cover-video', 'is-playing');
+    cover.classList.add('has-cover-image');
+    coverVideo.hidden = true;
+    fallback.hidden = false;
+    fallback.style.backgroundImage = `url("${A.cover}")`;
+  };
+  const open = async () => {
     if (opened) return;
     opened = true;
 
@@ -2969,75 +3257,40 @@ function boot(){
       else el.webkitRequestFullscreen?.();   /* older iPad Safari */
     } catch {}
 
-    cover.classList.add('is-open');
-    if (restartVideo && coverVideo?.src){
+    if (cover.classList.contains('has-cover-video') && coverVideo?.src){
+      cover.classList.add('is-playing');
       coverVideo.currentTime = 0;
-      coverVideo.play().catch(() => {});
-    }
+      coverVideo.play().catch(() => {
+        showCoverImage();
+        startFallbackOpen();
+      });
+    } else startFallbackOpen();
+
     try { await Music.play(); musicBtn.classList.remove('is-muted'); }
     catch { musicBtn.classList.add('is-muted'); }
-    /* the controls arrive a little before the cover is gone, so
-       they fade up over the last of it rather than popping in */
-    setTimeout(() => {
-      musicBtn.classList.remove('is-hidden');
-    }, Math.max(0, OPEN_MS - 900));
-    setTimeout(() => {
-      document.body.classList.remove('is-locked');
-      observeReveals();
-      cover.remove();
-      /* the cover is gone, so match the page's own ground colour */
-      setThemeColor('#efd9d7');
-    }, OPEN_MS);
   };
-  /* no gesture guards the video's autoplay, so try to start music
-     right away, in step with it; browsers that block that get a
-     fallback on the guest's first touch/click/key press instead. */
-  let audioUnlocked = false;
-  const unlockAudio = () => {
-    if (audioUnlocked) return;
-    audioUnlocked = true;
-    Music.play()
-      .then(() => musicBtn.classList.remove('is-muted'))
-      .catch(() => musicBtn.classList.add('is-muted'))
-      .finally(() => musicBtn.classList.remove('is-hidden'));
-  };
-  addEventListener('pointerdown', unlockAudio, { once:true, passive:true });
-  addEventListener('keydown', unlockAudio, { once:true });
-  unlockAudio();
+
+  $('#openBtn').addEventListener('click', open);
+  cover.addEventListener('click', open);
 
   if (coverVideo?.src){
     coverVideo.addEventListener('error', () => {
-      const fallback = $('#coverPhoto');
-      cover.classList.remove('has-cover-video');
-      cover.classList.add('has-cover-image');
-      coverVideo.hidden = true;
-      fallback.hidden = false;
-      fallback.style.backgroundImage = `url("${A.cover}")`;
-      /* the video's autoplay path never binds a tap handler, so a
-         failed video needs its own — otherwise the cover, and the
-         music that only starts on open(), are both stuck.        */
-      $('#openBtn').addEventListener('click', open);
-      cover.addEventListener('click', open);
+      showCoverImage();
+      if (opened) startFallbackOpen();
     }, { once:true });
     coverVideo.addEventListener('ended', () => {
       coverVideo.hidden = true;
-      $('#hero').classList.add('intro-active');
-      cover.remove();
-      document.body.classList.remove('is-locked');
-      observeReveals();
-      setThemeColor('#efd9d7');
-      musicBtn.classList.remove('is-hidden');
+      finishOpen();
     }, { once:true });
-    coverVideo.play().catch(() => {});
-  } else {
-    $('#openBtn').addEventListener('click', open);
-    cover.addEventListener('click', open);
   }
 
   musicBtn.addEventListener('click', () => {
     if (Music.playing){ Music.pause(); musicBtn.classList.add('is-muted'); }
     else { Music.resume(); musicBtn.classList.remove('is-muted'); }
   });
+  langBtn.addEventListener('click', () =>
+    applyLang(LANGS[(LANGS.indexOf(LANG) + 1) % LANGS.length]));
+
   /* redraw canvas art on resize / orientation change */
   let rt;
   addEventListener('resize', () => {
